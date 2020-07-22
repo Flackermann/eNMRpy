@@ -299,9 +299,11 @@ class SpecModel(object):
         if verbose:
             self.params.pretty_print()
 
-    def set_mathematical_constraints(self, expr):
+    def set_mathematical_constraints(self, expr=None, reset=True):
         """
         expr: mathematical expression without whitespace
+        
+        reset: will reset all mathematical constraints
         
         example 1:
             ph0 should be always equal to ph1
@@ -310,6 +312,16 @@ class SpecModel(object):
             ph0 should be always ph1 - 90 degree
             set_mathematical_constraint('ph0=ph1-90')
         """
+        
+        if (expr == None) and (reset):
+            print('model without constraints')
+            return
+        
+        elif reset:
+            for i in self.params:
+                self.params[i].expr = None
+            print('constraints were reset before new assignment')
+        
         if type(expr) == list:
             for e in expr:
                 a = e.split('=')
@@ -317,6 +329,8 @@ class SpecModel(object):
         else:
             a = expr.split('=')
             self.params[a[0]].expr = a[1]
+        
+         
         
     def set_initial_values(self, par, val):
         '''

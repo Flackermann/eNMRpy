@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
-Name: eNMRly
-Version: 0.0.0
+Name: eNMRpy
+Version: 0.0.1
 Summary: nmrglue-based package for the import and analysis of electrophoretic NMR-data
 Home-page: UNKNOWN
 Author: Florian Ackermann

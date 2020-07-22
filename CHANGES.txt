@@ -1,1 +1,6 @@
+Version 0.0.1
+- The subpkg Measurement was added to the build
+
+Version 0.0.0
 - SpecModel.set_mathematical_constraints() now resets all mathematical constraints before new assignment, which can be deactivated by setting reset=False
+

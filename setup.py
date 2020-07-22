@@ -1,11 +1,11 @@
 from setuptools import setup
 
 setup(
-   name='eNMRly',
-   version='0.0.0',
+   name='eNMRpy',
+   version='0.0.1',
    author='Florian Ackermann',
    author_email='nairolf.ackermann@gmail.com',
-   packages=['eNMRly'],
+   packages=['eNMRpy', 'eNMRly.Measurement'],
    #scripts=['bin/script1','bin/script2'],
    #url='http://pypi.python.org/pypi/PackageName/',
    license='LICENSE.txt',
