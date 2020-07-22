@@ -1,0 +1,1 @@
+- SpecModel.set_mathematical_constraints() now resets all mathematical constraints before new assignment, which can be deactivated by setting reset=False
