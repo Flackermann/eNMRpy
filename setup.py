@@ -5,7 +5,7 @@ setup(
    version='0.0.1',
    author='Florian Ackermann',
    author_email='nairolf.ackermann@gmail.com',
-   packages=['eNMRpy', 'eNMRly.Measurement'],
+   packages=['eNMRpy', 'eNMRpy.Measurement'],
    #scripts=['bin/script1','bin/script2'],
    #url='http://pypi.python.org/pypi/PackageName/',
    license='LICENSE.txt',
