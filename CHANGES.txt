@@ -1,5 +1,20 @@
+Version 0.0.2
+- SpecModel.set_mathematical_constraints()
+    - reset function was extended to the vary option solving a previously unintended behavior
+    - reset without array (expr=None) fixed
+    
+- a number of docstrings and comments were added
+
+- eNMRpy.Phasefitting.plot_correlations() changed to eNMRpy.Phasefitting.plot_correlations_heatmap()
+
+- eNMRpy.Phasefitting.SpecModel.plot_init_spec() the single_peaks default was set to False
+
+- eNMRpy.Phasefitting.SpecModel.get_phasedata() changed to .get_result_values(), as it is a more accurate description of the method
+
+
 Version 0.0.1
-- The subpkg Measurement was added to the build
+- The subpkg Measurement was added to the build to make it functional
+
 
 Version 0.0.0
 - SpecModel.set_mathematical_constraints() now resets all mathematical constraints before new assignment, which can be deactivated by setting reset=False

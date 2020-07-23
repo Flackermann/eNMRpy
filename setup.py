@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
    name='eNMRpy',
-   version='0.0.1',
+   version='0.0.2',
    author='Florian Ackermann',
    author_email='nairolf.ackermann@gmail.com',
    packages=['eNMRpy', 'eNMRpy.Measurement'],
