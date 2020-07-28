@@ -3,6 +3,7 @@ from sklearn.linear_model import huber as hub
 import numpy as np
 import nmrglue as ng
 import matplotlib.pyplot as plt
+import pandas as pd
 
 class _eNMR_Methods(Measurement):
     """
