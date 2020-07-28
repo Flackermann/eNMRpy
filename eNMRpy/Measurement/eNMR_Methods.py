@@ -3,6 +3,7 @@ from sklearn.linear_model import huber as hub
 import numpy as np
 import nmrglue as ng
 import matplotlib.pyplot as plt
+import pandas as pd
 
 class _eNMR_Methods(Measurement):
     """
@@ -591,6 +592,8 @@ class _eNMR_Methods(Measurement):
         else:
             colors = colors
         
+	# doesn't work if markers == None.
+	# This is probably due to matplotlib not being able to iterate the array
         if markers is None:
             markers = ['o', '^', 's', '+', '*', 'D', 'v', 'x', '<']
         else:
