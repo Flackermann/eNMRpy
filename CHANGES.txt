@@ -1,5 +1,5 @@
 Version 0.0.2
-- SpecModel.set_mathematical_constraints()
+- eNMRpy.Phasefitting.SpecModel.set_mathematical_constraints()
     - reset function was extended to the vary option solving a previously unintended behavior
     - reset without array (expr=None) fixed
     

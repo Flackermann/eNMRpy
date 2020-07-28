@@ -465,6 +465,7 @@ class SpecModel(object):
         return dic
     
     def report(self):
+        """shortcut to print self.result.fit_report()"""
         print(self.result.fit_report())
         
     def reassign_parameter(self, par, best_values_dic, vary=False):
@@ -636,11 +637,6 @@ class ParameterVariation(OrderedDict):
         '''
         mobilities:
             must be an array. mobilities are sorted according
-<Parameter 'l2', 1, bounds=[0:inf]>
-<Parameter 'ph2', 1, bounds=[-180:180]>
-<Parameter 'a2', 1, bounds=[0:inf]>
-Name         Value      Min      Max   Stderr     Vary     Expr Brute_Step
-a0           4e+05        0      inf to the peaks
         
         spec_par: dictionary with the spectroscopic parameters in SI units:
             Delta in s
@@ -663,7 +659,6 @@ a0           4e+05        0      inf to the peaks
                 '19F': 25.1662e7}[spec_par['NUC']]
         # Umrechnung von rad in °
         gamma = gamma/2/np.pi*360
-        print(gamma)
         
         U = np.linspace(*spec_par['Ulim'], n)
         print(U)
@@ -672,13 +667,11 @@ a0           4e+05        0      inf to the peaks
         Delta = spec_par['Delta']
         delta = spec_par['delta']
         
-        print(g, d, Delta, delta)
         for i, mu in enumerate(mobilities):
             self['ph%i'%i] = gamma*Delta*delta*g*(U/d)*mu
-        print(self)
+
         self.U = U
         self.spec_par = spec_par
-        pass
 
 
 
