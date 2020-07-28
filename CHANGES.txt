@@ -1,4 +1,6 @@
 Version 0.0.2
+- eNMRpy.Phasefitting.peakpicker() added, which returns a eNMR.Phasefitting.make_model()-compatible array with picked peaks
+
 - eNMRpy.Phasefitting.SpecModel.set_mathematical_constraints()
     - reset function was extended to the vary option solving a previously unintended behavior
     - reset without array (expr=None) fixed

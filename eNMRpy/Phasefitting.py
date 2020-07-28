@@ -38,6 +38,76 @@ def set_peaks(m, n=-1, timeout=-1, xlim=None, **plot_kwargs): #,xlim=(0,10)
     #returns an array with the selected coordinates
     return arr
 
+
+def peakpicker(x, y=None, width=10, threshold=1e5):
+    """
+    tool to automatically determine peak positions in an x-y spectrum
+    
+    x: ppm/frequency-array
+        x [optional]: Measurement-object of which the first slice is taken
+    y: intensity
+    
+    width: scan width. should be even numbered
+    
+    
+    returns: 2D-np.array with [[ppm,intensity],[...]] which can be passed to make_model
+    """
+    
+    #res: step size for scan
+    res=1
+
+    if type(x) != np.ndarray:
+        y = x.data[0]
+        x = x.ppm
+
+    
+    if width%2 != 0:
+        raise ValueError('width should be an even integer')
+#         return
+    
+    def advindx(arr, min, max):
+        """more or less introduces repeating boundaries for the array"""
+        if (min < 0) or (max > len(arr)):
+            a = arr[min:]
+            b = arr[0:max]
+            return np.append(a, b)
+        else:
+            return arr[min:max]
+    
+    def check_peak(y_out, width=width):
+        '''checks for consecutive increase and decrease of values'''
+        
+        arr = y_out
+        
+        sel_arr = np.array([])
+        for i in range(width):
+            # if adjacent values increase, the difference is positive.
+            # if adjacent values increase, the difference is negative.
+            sel_arr = np.append(sel_arr, (arr[i+1].real - arr[i].real))
+        
+        # check for increase or decrease
+        bool_arr = sel_arr > 0
+        
+        # if in the first part all values increase and the second part all values decrease
+        if (all(bool_arr[:width//2]) == True) and all(not x for x in bool_arr[width//2:]):
+            return True
+        else:
+            return False
+    
+    peaks = []
+    for i in range(0,len(y), res):
+        x_out = advindx(x,i-width,i+width)
+        y_out = advindx(y,i-width,i+width)
+
+        check = check_peak(y_out, width)
+    
+        if check and (y[i-width//2].real > threshold):
+            # i-width//2 ensures that the right coordinates are given for the respective peak
+            peaks.append((x[i-width//2], y[i-width//2].real))
+    
+    return np.array(peaks)
+
+
 def make_model(peaks, print_params=True):
     '''
     returns a SpecModel()-object with parameters generated from set_peaks()-array
