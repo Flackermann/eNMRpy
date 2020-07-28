@@ -15,7 +15,7 @@ setup(
        "nmrglue",
        "lmfit",
        "pandas",
-       "matplotlib",
+       "matplotlib>=3.1.3",
        "numpy",
        "scipy",
        'scikit-learn<=0.23',

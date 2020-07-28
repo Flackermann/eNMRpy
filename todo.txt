@@ -1,0 +1,31 @@
+- replace Measurement.eNMR_Methods.lin_huber according Scikit-lean documentation to avoid deprecated code
+
+- check lin_results_display for functionality in eNMRpy.Measurement.eNMR_Methods
+
+- Gewichtung der Peaks in Fit mit aufnehmen
+
+- m.autophase() refaktorisieren und umbenennen.
+- m.autophase_firstspec einführen, um eine 0. und 1. ORdnung Phasenkorrektur für das erste spektrum einzufügen.
+
+-peakpicking schreiben
+
+SQL-Anbindung
+=============
+
+- Welche Datenbankstruktur?
+	- Nutzer
+		-Messungs-ID (wie generieren, um Duplikate zu vermeiden?) --> Aus Metadaten generieren? --> Timestamp?
+		-Probenname
+		-Datum
+		-Substanz
+		-Pfad (zum Zeitpunkt der Auswertung)
+		-Kern
+		-Mobilität - Stabw.
+		-Experiment (Fitwerte, Parameter etc)
+			-Spannung
+			-Phasenwinkel
+			-Diffusionszeit
+			-Abhängigkeit (U oder G)
+			-Gradientendauer
+			-Gradientenintensität
+

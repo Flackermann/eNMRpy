@@ -390,7 +390,7 @@ class _eNMR_Methods(Measurement):
 
         return fig#, intensity_data
 
-    def lin_huber(self, epsilon=1.35, ulim=None, y_column='ph0acme'):
+    def lin_huber(self, epsilon=3, ulim=None, y_column='ph0'):
         """
         robust linear regression method from scikit-learn module based on the least-square method with an additional threshhold (epsilon) for outlying datapoints
         outlying datapoints are marked as red datapoints
@@ -471,7 +471,7 @@ class _eNMR_Methods(Measurement):
                                    'y': self._y_pred.ravel(),
                                    'sig_m': self.sig_m}
 
-    def lin_display(self, ylim=None, show_slope_deviation=True, n_sigma_displayed=1, dpi=500, y_column='ph0acme', textpos=(0.5,0.15), extra_note=''):
+    def lin_display(self, ylim=None, show_slope_deviation=True, n_sigma_displayed=1, dpi=500, y_column='ph0', textpos=(0.5,0.15), extra_note=''):
         """
         displays the linear huber regression
         If there is an alias available from measurement object, it will replace the path in the title
