@@ -1,4 +1,12 @@
 Version 0.0.2
+
+- code cleanup removing unnecessary wrapper functions which clutter the code
+    - eNMRpy.eNMR_Methods.plot_spec_comparison_to_0() removed since its a trivial plotting function
+    - eNMRpy.eNMR_Methods.analyzePhasecorretion()-wrapper removed!
+        - this should be done individually and is seldomly practical
+
+- autophase() changed to autophase_phase_analysis()
+
 - eNMRpy.Phasefitting.peakpicker() added, which returns a eNMR.Phasefitting.make_model()-compatible array with picked peaks
 
 - eNMRpy.Phasefitting.SpecModel.set_mathematical_constraints()

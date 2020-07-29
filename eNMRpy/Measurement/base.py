@@ -24,10 +24,7 @@ class Measurement(object):
         self.alias = alias
         self.name = self.dateipfad.split(sep='/')[-2]+'/'+self.expno
         self.lineb = linebroadening
-        
-        ## correction factor U_0 for normalized spectra
-        #self.U_0 = 0
-        
+                
         # takes the title page to extract the volt increment
         try:
             title = open(self.dateipfad+"/pdata/1/title").read()
@@ -149,6 +146,7 @@ class Measurement(object):
 
         if (xmin is not None) or (xmax is not None):
             self.data = self.set_spectral_region(xmin=xmin, xmax=xmax, mode=cropmode)
+    
 
     def plot_fid(self, xmax=None, xmin=0, step=1):
         """
@@ -172,7 +170,6 @@ class Measurement(object):
                    ncol=3,
                    title="row",
                    loc=1)
-        #plt.show()
         return fig
 
     def plot_spec(self, row, xlim=None, figsize=None, invert_xaxis=True, sharey=True):#, ppm=True):
@@ -181,7 +178,6 @@ class Measurement(object):
         
         :returns: figure
         """
-        
         
         _max = None if xlim is None else xlim[0]
         _min = None if xlim is None else xlim[1]

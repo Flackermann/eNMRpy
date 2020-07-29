@@ -16,15 +16,7 @@ class _eNMR_Methods(Measurement):
     alias:
         Here you can place an individual name relevant for plotting. If None, the path is taken instead.
     """
-    # def get_xaxis(self):
-    #
-    #     if self.dependency is not None:
-    #         return {
-    #             "G": self.eNMRraw["g in T/m"],
-    #             "U": self.eNMRraw["U / [V]"]
-    #         }[self.dependency.upper()]
-    #     else:
-    #         print("an error occured, the dependency is None")
+
     def __init__(self, path, measurement, alias=None,  linebroadening=5):
         super().__init__(path, measurement, alias=None,  linebroadening=5)
         
@@ -48,22 +40,17 @@ class _eNMR_Methods(Measurement):
         elif type(key) == int:
             return (self.ppm, self.data[key])
         
-    #def __add__(self, other):
-        
     
-    def spam_and_eggs(self):
-        """
-        For Class inheritance test purposes
-        """
-        #self.x_var = {None:None,
-                #"U": "U / [V]",
-                #"G": "g in T/m"
-        #}
-        print(self.x_var)
-        print("SPAM and EGGS!")
+    
+    #def autophase_first_spec(self):
+        #'''
+        #nifty tool to automatically autophase the first
+        #'''
         
+        #return
+                
 
-    def autophase(self,
+    def autophase_phase_analysis(self,
                   returns=False,
                   method="acme",
                   progress=False,
@@ -122,7 +109,6 @@ class _eNMR_Methods(Measurement):
                 if progress:
                     clear_output() # keeps the output clean. remove for more info on iteration steps etc.
        
-        #corr_enmr = self.eNMRraw.sort_values("U / [V]")
         corr_enmr = self.eNMRraw.sort_values(self._x_axis)
         
         if method == 'acme':
@@ -141,7 +127,6 @@ class _eNMR_Methods(Measurement):
                     corr_enmr["ph0acme"].iloc[m] -= self.U_0
                 self.eNMRraw = corr_enmr
 
-            #self.eNMRraw["ph0acmereduced"] = corr_enmr['ph0acme']/(self.eNMRraw['g in T/m'][0]*self.Delta*self.delta*self.gamma*self.d)
             self.eNMRraw["ph0acmereduced"] = corr_enmr['ph0acme']*self.d/(self.eNMRraw['g in T/m'][0]*self.Delta*self.delta*self.gamma)
         elif method == 'difference':
             if period_compensation:
@@ -158,7 +143,6 @@ class _eNMR_Methods(Measurement):
                     corr_enmr["ph0diff"].iloc[m] -= self.U_0
                 self.eNMRraw = corr_enmr
 
-            #self.eNMRraw["ph0diffreduced"] = corr_enmr['ph0diff']/(self.eNMRraw['g in T/m'][0]*self.Delta*self.delta*self.gamma*self.d)
             self.eNMRraw["ph0diffreduced"] = corr_enmr['ph0diff']*self.d/(self.eNMRraw['g in T/m'][0]*self.Delta*self.delta*self.gamma)
         else:
             if period_compensation:
@@ -182,7 +166,7 @@ class _eNMR_Methods(Measurement):
         if returns is True:
             return data_ph  # , data_spec
 
-    def _autops(self, data, _fnc="acme", p0=0.0):  # , p1=0.0):
+    def _autops(self, data, _fnc="acme", p0=0.0, p1=None):  # , p1=0.0):
         """
         FS: modified for eNMR purpose. optimizes only p0
         ----------
@@ -211,7 +195,7 @@ class _eNMR_Methods(Measurement):
         
         self._fnc = _fnc
         self._p0 = p0
-        # self.p1 = p1
+        self._p1 = p1
         
         if not callable(_fnc):
             self._fnc = {
@@ -220,14 +204,25 @@ class _eNMR_Methods(Measurement):
                 'difference': self._ps_abs_difference_score,
                 'sqdifference': self._ps_sq_difference_score
             }[self._fnc]
+        
+        # this is the behavior for the analysis in the eNMR context
+        if p1 == None:
+            # self.opt ist die optimierte Phase für das Spektrum.
+            self.opt = self._p0  # [self._p0, self.p1]
+            self.opt = fmin(self._fnc, x0=self.opt, args=(data, ), disp=0)
 
-        # self.opt ist die optimierte Phase für das Spektrum.
-        self.opt = self._p0  # [self._p0, self.p1]
-        self.opt = fmin(self._fnc, x0=self.opt, args=(data, ), disp=0)
+            # self.phasedspc = ng.proc_base.ps(data, p0=self.opt[0], p1=self.opt[1])
 
-        # self.phasedspc = ng.proc_base.ps(data, p0=self.opt[0], p1=self.opt[1])
+            return self.opt  # self.phasedspc, self.opt
+        
+        # this is used to autophase the spectrum and get the values zero and first order
+        elif p1 != None:
+            # self.opt ist die optimierte Phase für das Spektrum.
+            self.opt = (self._p0, self._p1)
+            self.opt = fmin(self._fnc, x0=self.opt, args=(data, ), disp=0)
 
-        return self.opt  # self.phasedspc, self.opt
+            #self.phasedspc = ng.proc_base.ps(data, p0=self.opt[0], p1=self.opt[1])
+            return self.opt  # self.phasedspc, self.opt
 
     @staticmethod
     def _ps_acme_score(ph, data):
@@ -254,9 +249,15 @@ class _eNMR_Methods(Measurement):
         """
         stepsize = 1
         
-        # s0 --> initial spectrum?
-        s0 = ng.proc_base.ps(data, p0=-ph, p1=0)  # , p1=phc1 --> p1=0 lets the algorithm optimize only p0
+
+        if (len(ph) == 1):
+            s0 = ng.proc_base.ps(data, p0=-ph, p1=0)  # , p1=phc1 --> p1=0 lets the algorithm optimize only p0
+        
+        else:
+            s0 = ng.proc_base.ps(data, p0=-ph[0], p1=ph[1])  # optimizing for ph0 and ph1
+        
         data = np.real(s0)
+        
 
         # Calculation of first derivatives --> hier wird das absolute Spektrum erzeugt
         ds1 = np.abs((data[1:]-data[:-1]) / (stepsize*2))
@@ -338,12 +339,10 @@ class _eNMR_Methods(Measurement):
             'orig': self.data_orig
             'cropped': self.data
 
-        return: fig
+        returns: fig, intensity_data
         """
         _data = {'orig': self.data_orig,
                 'cropped': self.data}[data]
-
-        # x_axis = {}[self.dependency]
 
         # the correction factor for the normalization is added again.
         self.phased = [ng.proc_base.ps(_data[n, :], p0=-(self.eNMRraw.loc[n, ph_var]))# + self.U_0))
@@ -353,8 +352,7 @@ class _eNMR_Methods(Measurement):
         
         if normalize:
             intensity /= intensity[0]
-                
-        #u = [self.eNMRraw.loc[i, 'U / [V]'] for i, n in enumerate(self.eNMRraw['U / [V]'])]
+
         u = [self.eNMRraw.loc[i, self._x_axis] for i, n in enumerate(self.eNMRraw[self._x_axis])]
 
         intensity_data = pd.DataFrame()
@@ -388,8 +386,9 @@ class _eNMR_Methods(Measurement):
 
         intensity_data.to_csv(self.path+'intensity_data_'+self.expno+".csv")
 
-        return fig#, intensity_data
+        return fig, intensity_data
 
+    # should be replaced by a more recent function since it will be deprecated
     def lin_huber(self, epsilon=3, ulim=None, y_column='ph0'):
         """
         robust linear regression method from scikit-learn module based on the least-square method with an additional threshhold (epsilon) for outlying datapoints
@@ -579,6 +578,9 @@ class _eNMR_Methods(Measurement):
         
         #self._x_axis = {"U":"U / [V]", "G":"g in T/m"}[self.dependency.upper()]
         
+        if type(cols) != list:
+            raise TypeError('cols should be a list')
+        
         if fig is None:
             fig = plt.figure(figsize=figsize)
         else:
@@ -592,8 +594,6 @@ class _eNMR_Methods(Measurement):
         else:
             colors = colors
         
-	# doesn't work if markers == None.
-	# This is probably due to matplotlib not being able to iterate the array
         if markers is None:
             markers = ['o', '^', 's', '+', '*', 'D', 'v', 'x', '<']
         else:
@@ -623,16 +623,7 @@ class _eNMR_Methods(Measurement):
                     ax.errorbar(self.eNMRraw[self._x_axis], self.eNMRraw[col]-corr, fmt='o', label=message[col], c=colors[i], marker=markers[i])
                 if regression:
                     ax.plot(self.lin_res_dic[col]['x'], self.lin_res_dic[col]['y']-corr, '--', label='%s lin regression'%col, c=colors[i], marker=None)
-        #if type(cols) == list:
-            #for i, col in enumerate(cols):
-                #try:
-                    #ax.errorbar(self._x_axis, col, yerr='%s_err'%col, fmt='o', data=self.eNMRraw, label=message[col], c=colors[i], marker=markers[i])
-                #except KeyError:
-                    #ax.errorbar(self._x_axis, col, yerr='%s_err'%col, fmt='o', data=self.eNMRraw, label='fitted data %s'%col, c=colors[i], marker=markers[i])
-                #except ValueError:
-                    #ax.errorbar(self._x_axis, col, fmt='o', data=self.eNMRraw, label=message[col], c=colors[i], marker=markers[i])
-                #if regression:
-                    #ax.plot(self.lin_res_dic[col]['x'], self.lin_res_dic[col]['y'], '--', label='%s lin regression'%col, c=colors[i], marker=None)
+
         else:
             if normalize:
                 corr = self.eNMRraw.loc[self.eNMRraw['U / [V]']==0, cols][0]
@@ -652,17 +643,7 @@ class _eNMR_Methods(Measurement):
                 ax.errorbar(self.eNMRraw[self._x_axis], self.eNMRraw[cols]-corr, fmt='o', label=message[cols], c=colors[0], marker=markers)
                 if regression:
                     ax.plot(self.lin_res_dic[cols]['x'], self.lin_res_dic[cols]['y']-corr, '--', label='%s lin regression'%cols, c=colors[0], marker=None)
-        #else:
-            #try:
-                #ax.errorbar(self._x_axis, cols, yerr='%s_err'%cols, fmt='o', data=self.eNMRraw, label='Phasefitting of Peak %s' %cols, c=colors[0], marker=markers)
-                #if regression:
-                    #ax.plot(self.lin_res_dic[cols]['x'], self.lin_res_dic[cols]['y'], '--', label='%s lin regression'%cols, c=colors[0], marker=markers)
-            #except KeyError:
-                    #ax.errorbar(self._x_axis, col, yerr='%s_err'%col, fmt='o', data=self.eNMRraw, label='fitted data %s'%cols, c=colors[i], marker=markers)
-            #except ValueError:
-                #ax.errorbar(self._x_axis, cols, fmt='o', data=self.eNMRraw, label=message[cols], c=colors[0], marker=markers)
-                #if regression:
-                    #ax.plot(self.lin_res_dic[cols]['x'], self.lin_res_dic[cols]['y'], '--', label='%s lin regression'%cols, c=colors[0], marker=None)
+
         ax.legend(bbox_to_anchor=(x_legend, y_legend), ncol=ncol_legend)
         
         xlabel = {'U': r'$U$ / V',
@@ -678,9 +659,9 @@ class _eNMR_Methods(Measurement):
             ax.set_ylabel(r'$\phi$ / °')
         return fig
 
-    def plot_spec_phcorr(self, phasekey='ph0acme', xlim=None, save=False, savepath=None, show=True, ppm=True, orig_data=True, x_legend=1.1, y_legend= 1.0, ncol_legend=2):
+    def plot_phcorrected_spectra(self, phasekey='ph0acme', xlim=None, save=False, savepath=None, show=True, ppm=True, orig_data=True, x_legend=1.1, y_legend= 1.0, ncol_legend=2):
         """
-        plots phase corrected rows
+        plots phase corrected rows stacking the spectra to visualize the analysis result
 
         ppm: When True, plots the x-axis with ppm scale, xmin and xmax then are percentages
             if False, plots only the number of datapoints, xmin and xmax then are absolute values
@@ -703,12 +684,9 @@ class _eNMR_Methods(Measurement):
             phasedspc = [ng.proc_base.ps(self.data[n, :], p0=-(self.eNMRraw[phasekey][n]))# obsolet: +self.U_0))  # the correction factor for the normalization is added again.
                           for n in range(len(self.data[:, 0]))]  # p1=self.opt[1])
             
-        #xmin = 0 if xmin is None else xmin
         fig, ax = plt.subplots()
         
         if not ppm:
-            #xmax = self.TD if xmax is None else xmax
-            #xmax = len(self.data[0,:]) if xmax is None else xmax
             for n in range(len(self.data[:, 0])):
                 ax.plot(phasedspc[n].real)
             ax.set_xlim(xlim)
@@ -716,84 +694,39 @@ class _eNMR_Methods(Measurement):
             ax.set_ylabel("intensity (a.u.)")
 
         else:
-            #xmax = self.ppm[0] if xmax is None else xmax
-            #xmin = self.ppm[-1] if xmin is None else xmin
-            #ixmax, ixmin = np.where(self.ppm >= xmin)[0][0], np.where(self.ppm >= xmax)[0][1]
-#             irange = np.where(self._ppmscale <= xmin)[0][0], np.where(self._ppmscale <= xmax)[0][1]
-
             if orig_data:
                 for n in range(len(self.data_orig[:, 0])):
-                    # plt.plot(self._ppmscale[ixmin:ixmax], phasedspc[n].real)
                     ax.plot(self.ppm, phasedspc[n].real, label="row %i" %n)
             else:
                 for n in range(len(self.data[:, 0])):
-                    # plt.plot(self._ppmscale[ixmin:ixmax], phasedspc[n].real)
                     ax.plot(self.ppm, phasedspc[n].real, label="row %i" %n)
-            # plt.axis(xmin=self._ppm_l-self.dic["acqus"]["SW"]*xmin/100,
-            #          xmax=self._ppm_r+self.dic["acqus"]["SW"]*(1-xmax/100))
             ax.set_xlim(xlim)
             ax.set_xlabel("$\delta$ / ppm")
             ax.set_ylabel("intensity / a.u.")
             ax.legend(bbox_to_anchor=(x_legend, y_legend), ncol=ncol_legend)
 
-        #ax = plt.gca()
-        #ax.set_xlim(ax.get_xlim()[::-1])  # inverts the x-axis
         ax.ticklabel_format(style='sci', scilimits=(0,0), axis='y')
 
         if save:
             fig.savefig(path, dpi=500)
         if show:
             plt.show()
-        #print("ixmax:", ixmax)
-        #print("ixmin:", ixmin)
-#         return ixmax, ixmin
         phasedspc = np.asarray(phasedspc)
         
         return fig, ax
-        #if orig_data:
-            #return phasedspc[:,ixmin:ixmax]
-        #else:
-            #return phasedspc
-        # ps = ng.proc_base.ps
-
-    def plot_spec_comparison_to_0(self, row, xmax=None, xmin=None, ppm=True):
-        """
-        plots row 0 and row n in the range of xmax and xmin
-        """
-        _max = None if xmax is None else xmax
-        _min = None if xmin is None else xmin
-
-        fig = plt.figure()
-        if ppm:
-            _max = self.ppm[0] if xmax is None else xmax
-            _min = self.ppm[-1] if xmin is None else xmin
-            
-            plt.plot(self.ppm, self.data[0, ::1].real, label='row ' + str(0))
-            plt.plot(self.ppm, self.data[row, ::1].real, label='row ' + str(row))
-            plt.legend()
-            plt.axis(xmax=_max, xmin=_min)
-            plt.title("this is row %i at %.0f V" % (row, self.eNMRraw.loc[row, self._x_axis]))
-            plt.xlabel("ppm")
-            plt.ylabel("intensity / a.u.")
-        if not ppm:
-            plt.plot(self.data[0, ::1].real, label='row '+str(0))
-            plt.plot(self.data[row, ::1].real, label='row '+str(row))
-            plt.legend()
-            plt.axis(xmax=_max, xmin=_min)
-            plt.title("this is row %i at %.0f V" % (row, self.eNMRraw.loc[row, self._x_axis]))
-            plt.xlabel("datapoints")#.sum()
-            plt.ylabel("intensity / a.u.")
-
-        plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-
-        return fig
-
-    def output_data(self):
+        
+    def output_phase_data(self, path=None):
         """
         saves the raw phase data in the measurement-folder as a csv
+        
+        if path is None: saves in self.path+"phase_data_"+self.expno+".csv"
         """
-        self.eNMRraw.to_csv(self.path+"phase_data_"+self.expno+".csv", sep=" ")
-
+        if path != None:
+            self.eNMRraw.to_csv(path, sep=" ")
+            return
+        else:
+            self.eNMRraw.to_csv(self.path+"phase_data_"+self.expno+".csv", sep=" ")
+            return
 
     def output_results(self, path=None):
         """
@@ -914,47 +847,3 @@ class _eNMR_Methods(Measurement):
         
         return self.mu, self.mu*(self.sig_m/self.m)
 
-
-    def analyzePhasecorrection(self, linebroadening=10, lin_threshhold=2.5,
-                           graph_save=False, savepath=None, method="acme", xmin=None,
-                           xmax=None, cropmode="absolute", progress=True, umin=None, umax=None, output_path=None):
-
-        """
-        standard phase correction analyzing routine for eNMR
-        
-        linebroadening:
-            sets the linebroadening of the fourier transformation
-        lin_threshhold:
-            sets the threshhold for outlier detection of the linear regression
-        graph_save:
-            True: saves the graph as a png in the measurment folder
-        savepath:
-            None: Takes the standard-values from the measurement
-            'string': full path to customized graph
-                    works with .png, .pdf and .eps suffixes
-        method: chooses between phase correction algorithms
-			"acme": standard method using entropy minimization
-			"difference": --> _ps_abs_difference_score()
-                minimizes the linear difference to the first spectrum by fitting p0
-            "sqdifference": --> _ps_sq_difference_score()
-                minimizes the square difference to the first spectrum by fitting p0
-        xmin, xmax:
-            min and maximum x-values to crop the data for processing (and display)
-            can take relative or absolute values depending on the cropmode.
-        
-        cropmode: changes the x-scale unit
-            "percent": value from 0% to 100% of the respective x-axis-length --> does not fail
-            "absolute": takes the absolute values --> may fail
-        progress: This shows the spectral row that is processed in this moment. May be disabled in order to be able to stop clearing the output.
-        """
-        if output_path is None:
-            output_path = 'expno_%i_results.xlsx'%self.expno
-        
-        self.proc(linebroadening=linebroadening, xmin=xmin, xmax=xmax, cropmode=cropmode)
-        self.autophase(analyze_only=False, method=method, progress=progress)
-        self.lin_huber(epsilon=lin_threshhold, umin=umin, umax=umax)
-        # obj.lin() #---> dies ist die standardn, least squares method.
-        self.lin_display(save=graph_save, dpi=330, savepath=savepath)
-        self.mobility()
-        self.output_all_results(output_path)
- 

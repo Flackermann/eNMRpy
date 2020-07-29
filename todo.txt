@@ -1,7 +1,5 @@
 - replace Measurement.eNMR_Methods.lin_huber according Scikit-lean documentation to avoid deprecated code
 
-- check lin_results_display for functionality in eNMRpy.Measurement.eNMR_Methods
-
 - Gewichtung der Peaks in Fit mit aufnehmen
 
 - m.autophase() refaktorisieren und umbenennen.
