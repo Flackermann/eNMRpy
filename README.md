@@ -1,17 +1,28 @@
-====Funktionsumfang====
+# Info
+This package is a nifty tool for the import and analysis of electrophoretic NMR(eNMR)-spectroscopic data.
 
-- Import von Bruker-NMR-Daten
+For contributions and questions, please consider the <a href="https://github.com/Flackermann/eNMRpy">GitHub repository</a>.
+When using this for scientific pusposes, please cite <a href="https://doi.org/10.1002/mrc.4978">this paper</a>.
+
+Further documentation will be available soon.
+
+# Installation
+Install the package simply via <code>$ pip install eNMRpy</code>
+
+# Range of functions covered
+
+- Import of Bruker-based eNMR-Data
     - eNMR Daten (aktuell nur Spannungsabhängig)
         - Schönhoff-Aufbau
         - Pavel-Aufbau
     
 - Phasenwinkelanalyse
-    - Phasenkorrektur-Analyse
+    - Phasenkorrektur-Analyse (old approach)
         - Entropieminimierung
         - Spektrenabgleich
         - Vergleich der Phasenkorrigierten Spektren durch Übereinanderlegen
 
-    - Phasenanalyse mittels Fitting
+    - Phasenanalyse mittels Fitting (new approach)
         - Lorentz/Voigt-Peaks
             - superposition von beliebig vielen Peaks
             - Individuelles festsetzen von Parametern
