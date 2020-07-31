@@ -17,8 +17,8 @@ class _eNMR_Methods(Measurement):
         Here you can place an individual name relevant for plotting. If None, the path is taken instead.
     """
 
-    def __init__(self, path, measurement, alias=None,  linebroadening=5):
-        super().__init__(path, measurement, alias=None,  linebroadening=5)
+    def __init__(self, path, expno, alias=None,  lineb=5):
+        super().__init__(path, expno, alias=None,  lineb=5)
         
         self._x_axis = {"U": "U / [V]",
                    "G": "g in T/m",

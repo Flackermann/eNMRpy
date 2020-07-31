@@ -1,11 +1,9 @@
+- add the parameters from a fitmodel to the measurement object to be saved with save_eNMRpy()
+
 - replace Measurement.eNMR_Methods.lin_huber according Scikit-lean documentation to avoid deprecated code
 
 - Gewichtung der Peaks in Fit mit aufnehmen
 
-- m.autophase() refaktorisieren und umbenennen.
-- m.autophase_firstspec einführen, um eine 0. und 1. ORdnung Phasenkorrektur für das erste spektrum einzufügen.
-
--peakpicking schreiben
 
 SQL-Anbindung
 =============

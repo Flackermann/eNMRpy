@@ -3,6 +3,7 @@ import nmrglue as ng
 from re import findall
 import numpy as np
 import pandas as pd
+from io import StringIO
 
 class Measurement(object):
     """
@@ -15,15 +16,18 @@ class Measurement(object):
         the to the experiment corresponding EXPNO
     alias:
         Here you can place an individual name relevant for plotting. If None, the path is taken instead.
+        
+    lineb:
+        linebroadening
     """
 
-    def __init__ (self, path, measurement, alias=None,  linebroadening=5, n_zf_F2=2**14):
+    def __init__ (self, path, expno, alias=None,  lineb=5, n_zf_F2=2**14):
         self.path = path
-        self.expno = str(measurement)
+        self.expno = str(expno)
         self.dateipfad = self.path+self.expno
         self.alias = alias
         self.name = self.dateipfad.split(sep='/')[-2]+'/'+self.expno
-        self.lineb = linebroadening
+        self.lineb = lineb
                 
         # takes the title page to extract the volt increment
         try:
@@ -53,12 +57,12 @@ class Measurement(object):
 
         # Bestimmung der dictionaries für die NMR-Daten aus den Messdateien
         # --> wichtig für die Entfernung des digitalen Filters
-        self.udic = ng.bruker.guess_udic(self.dic, self.data)
-        self._uc = ng.fileiobase.uc_from_udic(self.udic)
+        #self.udic = ng.bruker.guess_udic(self.dic, self.data)
+        #self._uc = ng.fileiobase.uc_from_udic(self.udic)
 
         # getting some other variables
         self.TD = self.dic["acqus"]["TD"]
-        self.fid = self.data
+        self.fid = self.data.copy()
         self.n_zf_F2 = n_zf_F2
 
         # the gamma_values in rad/Ts
@@ -182,7 +186,7 @@ class Measurement(object):
         _max = None if xlim is None else xlim[0]
         _min = None if xlim is None else xlim[1]
         
-        if type(xlim) is not list:
+        if type(xlim) != list:
             fig = plt.figure(figsize=figsize)
             ax = fig.add_subplot(111)
         elif type(xlim) == list:
@@ -191,8 +195,8 @@ class Measurement(object):
         _min = self.ppm[0] if xlim is None else xlim[1]
         _max = self.ppm[-1] if xlim is None else xlim[0]
         
-        if type(xlim) is not list:
-            if type(row) ==list:
+        if type(xlim) != list:
+            if type(row) == list:
                 for r in row:
                     ax.plot(self.ppm, self.data[r, ::1].real, label='row %i'%r)
             else:
@@ -281,13 +285,13 @@ class Measurement(object):
 
             elif mode == "absolute":
                 if ppm:
-                    print('xmin: %i' % xmin)
-                    print('xmax: %i' % xmax)
+                    #print('xmin: %i' % xmin)
+                    #print('xmax: %i' % xmax)
                     xmax = np.where(self._ppmscale <= xmax)[0][-1]  # if xmax is not None else -1
                     xmin = np.where(self._ppmscale >= xmin)[0][0]  # if xmin is not None else 0
-                    print('xmin: %i' % xmin)
-                    print('xmax: %i' % xmax)
-                    print(self._ppmscale)
+                    #print('xmin: %i' % xmin)
+                    #print('xmax: %i' % xmax)
+                    #print(self._ppmscale)
                 
                 if original_data:
                     self.data = self.data_orig[:, xmin:xmax]
@@ -296,6 +300,55 @@ class Measurement(object):
                     
                 self.ppm = self._ppmscale[xmin:xmax]
             else:
-                print('oops, you mistyped the mode')
-        return self.data, self._ppmscale[xmin:xmax]
+                raise ValueError('oops, you mistyped the mode')
+            
+        return self.data, self.ppm # self._ppmscale[xmin:xmax]
  
+
+    def save_eNMRpy(self, path):
+        '''
+        saves the instance variables of the object in a .eNMRpy file
+        '''
+        
+        out_dic = {}
+        
+        # reduced number of instance variables for 1D-Measurements which may be potentially saved
+        if self.__class__.__name__ == "Measurement":
+            instance_variables_keys = ['path', 'expno', 'dateipfad', 'alias', 'name', 'lineb', 'title_page', 'dic', 'data', 'ppm',
+                                'pdata', '_ppm_r', '_ppm_l', 'TD', 'n_zf_F2', 'gamma', 'nuc']
+        
+        # full range of instance variables for an eNMR-Measurement
+        else:
+            instance_variables_keys = ['path', 'expno', 'dateipfad', 'alias', 'name', 'lineb', 'title_page', 'dic', 'data', 'ppm',
+                                'pdata', '_ppm_r', '_ppm_l', 'TD', 'n_zf_F2', 'gamma', 'nuc', 'lin_res_dic', '_x_axis',
+                                'dependency', 'cell_resistance', 'Delta', 'delta', 'eNMRraw', 'difflist', 'd', 'g']
+        
+        # check if the given path ends with .eNMRpy
+        if path.split('.')[-1] != 'eNMRpy':
+            # if not, change path end to .eNMRpy
+            path += '.eNMRpy'
+        
+        # write selected instance variables in output-dictionary
+        for k in instance_variables_keys:
+            # if instance variable is np-array
+            if type(self.__dict__[k]) == np.ndarray:
+                # write array as re-readable string
+                s = StringIO()
+                np.savetxt(s, self.__dict__[k])
+                out_dic[k] = s.getvalue()
+                pass
+            # write pandas DataFrames in json-format
+            elif type(self.__dict__[k]) == pd.DataFrame:
+                out_dic[k+'_type_pd.DataFrame'] = self.__dict__[k].to_json()
+            # write everything else
+            else:
+                out_dic[k] = self.__dict__[k]
+        
+    #     if json:
+    #         json.dump(out_dic, open(path, 'w'))
+    #         return
+        
+        f = open(path,'w')
+        f.write(str(out_dic))
+        f.close()
+        return

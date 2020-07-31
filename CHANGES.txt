@@ -1,4 +1,12 @@
 Version 0.0.2
+- method .save_eNMRpy() added to save already processed measurements for later imports --> see Load_eNMRpy_data
+
+- class Load_eNMRpy_data(_eNMR_Methods): added in tools to import .eNMRpy files
+    - nifty class returning an object which can be used as other Measurement-objects
+
+- tools module moved from Measurement to main module
+
+- base.Measurement.udic and ._uc removed. They were not in use
 
 - code cleanup removing unnecessary wrapper functions which clutter the code
     - eNMRpy.eNMR_Methods.plot_spec_comparison_to_0() removed since its a trivial plotting function
