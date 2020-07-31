@@ -1,6 +1,6 @@
 from .eNMR_Methods import _eNMR_Methods
 import pandas as pd
-
+import xml.etree.ElementTree as etree
 
 class Pavel(_eNMR_Methods):
     '''
@@ -17,24 +17,25 @@ class Pavel(_eNMR_Methods):
 
     alias:
         Here you can place an individual name relevant for plotting. If None, the path is taken instead.
-    linebroadening:
+    lineb:
         setting a standard-value for the linebroadening.
+    d:
+        electrode_distance
     '''
-    def __init__(self, path, expno, dependency='U', alias=None, linebroadening=5, electrode_distance=2.2e-2, cell_resistance=None):
+    def __init__(self, path, expno, dependency='U', alias=None, lineb=5, d=2.2e-2, cell_resistance=None):
         
         self.dependency = dependency
         self.cell_resistance = cell_resistance
         
-        super().__init__(path, expno, linebroadening=linebroadening, alias=alias)
+        super().__init__(path, expno, lineb=lineb, alias=alias)
         
         #self._x_axis = {"G": 'g in T/m', "U": 'U / [V]'}[dependency.upper()]
         # import the diffusion parameters
-        import xml.etree.ElementTree as etree
         diffpar = etree.parse(self.dateipfad+'/diff.xml')
         root = diffpar.getroot()
         self.Delta = float(root.findall('DELTA')[0].text)*1e-3
         self.delta = float(root.findall('delta')[0].text)*1e-3  #in Seconds
-        print('The diffusion parameters were read from the respectie .XML!')
+        print('The diffusion parameters were read from the respective .XML!')
         
         try:
             self.vdList = pd.read_csv(self.dateipfad+"/vdlist",
@@ -55,7 +56,7 @@ class Pavel(_eNMR_Methods):
                                     names=["g in T/m"])*0.01
         self.eNMRraw["g in T/m"] = self.difflist
         
-        self.d = electrode_distance
+        self.d = d
         self.g = self.eNMRraw["g in T/m"][0]
         
 
@@ -111,12 +112,3 @@ class Pavel(_eNMR_Methods):
     def plot_spec(self, row, xlim=None, figsize=None, invert_xaxis=True, sharey=True):#, ppm=True):
         from .Juergen1 import Juergen1 as eNMR_Measurement
         return eNMR_Measurement.plot_spec(self, row, xlim, figsize, invert_xaxis, sharey)#, ppm=True):
-
-#class Idependent(Pavel):
-    #def __init__(self, path, expno, dependency='U', alias=None, linebroadening=5, electrode_distance=2.2e-2):
-        #Pavel.__init__(path, expno, dependency='U', alias=None, linebroadening=5, electrode_distance=2.2e-2)
-        
-        #self.eNMR['I'] = None#vd=Funktion
-        
-        #self.eNMR.drop('U / [V]', inplace=True)
- 

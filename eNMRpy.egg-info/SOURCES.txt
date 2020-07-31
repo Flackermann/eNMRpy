@@ -1,9 +1,10 @@
 MANIFEST.in
-README.txt
+README.md
 setup.py
 eNMRpy/MOSY.py
 eNMRpy/Phasefitting.py
 eNMRpy/__init__.py
+eNMRpy/tools.py
 eNMRpy.egg-info/PKG-INFO
 eNMRpy.egg-info/SOURCES.txt
 eNMRpy.egg-info/dependency_links.txt
@@ -16,4 +17,3 @@ eNMRpy/Measurement/Simulated.py
 eNMRpy/Measurement/__init__.py
 eNMRpy/Measurement/base.py
 eNMRpy/Measurement/eNMR_Methods.py
-eNMRpy/Measurement/tools.py

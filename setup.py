@@ -10,7 +10,7 @@ setup(
    #url='http://pypi.python.org/pypi/PackageName/',
    license='LICENSE.txt',
    description='nmrglue-based package for the import and analysis of electrophoretic NMR-data',
-   long_description=open('README.txt').read(),
+   long_description=open('README.md').read(),
    install_requires=[
        "nmrglue",
        "lmfit",
