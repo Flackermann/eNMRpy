@@ -21,7 +21,7 @@ class Measurement(object):
         linebroadening
     """
 
-    def __init__ (self, path, expno, alias=None,  lineb=5, n_zf_F2=2**14):
+    def __init__ (self, path, expno, alias=None,  lineb=.3, n_zf_F2=2**14):
         self.path = path
         self.expno = str(expno)
         self.dateipfad = self.path+self.expno

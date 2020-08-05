@@ -1,12 +1,17 @@
 Version 0.0.3
--------------------------------------------------------------------------------------------------------------------
+-------------
+- sphinx-frame for documentation added
+
+- changed auto-imports in __init__ when importing eNMRpy
+
 - FileNotFoundError added for missing vdlist
 
 - A more specific error message was included when trying to import 1-dimensional instead of 2-dimensional NMR data.
     - This may occur when a measurement did not finish successfully or was aborted.
 
 Version 0.0.2
--------------------------------------------------------------------------------------------------------------------
+-------------
+
 - method .save_eNMRpy() added to save already processed measurements for later imports --> see Load_eNMRpy_data
 
 - class Load_eNMRpy_data(_eNMR_Methods): added in tools to import .eNMRpy files
@@ -39,11 +44,13 @@ Version 0.0.2
 
 
 Version 0.0.1
--------------------------------------------------------------------------------------------------------------------
+-------------
+
 - The subpkg Measurement was added to the build to make it functional
 
 
 Version 0.0.0
--------------------------------------------------------------------------------------------------------------------
+-------------
+
 - SpecModel.set_mathematical_constraints() now resets all mathematical constraints before new assignment, which can be deactivated by setting reset=False
 

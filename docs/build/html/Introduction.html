@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>About eNMRpy &#8212; eNMRpy 0.0.2 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="How to…" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="about-enmrpy">
+<h1>About eNMRpy<a class="headerlink" href="#about-enmrpy" title="Permalink to this headline">¶</a></h1>
+<p>eNMRpy is a tool for the import and analysis of electrophoretic NMR (eNMR) Data. It was created for the purpose of automatizing routine analysis procedures, importing meta parameters from measurement folders, while providing a framework for the analysis NMR signal phase shifts in a 2D eNMR experiment.</p>
+<p>eNMRpy is based on <a class="reference external" href="https://github.com/jjhelmus/nmrglue">nmrglue</a> and <a class="reference external" href="https://github.com/lmfit/lmfit-py">lmfit</a>, two exceptional python packages for importing and processing NMR-data, and nonlinear regression.</p>
+<div class="section" id="enmr-basics">
+<h2>eNMR basics<a class="headerlink" href="#enmr-basics" title="Permalink to this headline">¶</a></h2>
+<p>eNMR is a unique NMR spectroscopic technique for the investigation of transport properties in electrolytes under the influence of an electric field. The electric field <span class="math notranslate nohighlight">\(E\)</span> induces a coherent drift velocity <span class="math notranslate nohighlight">\(\nu\)</span> of the investigated NMR-active nuclei, which is proportional to the electrophoretic mobility <span class="math notranslate nohighlight">\(\mu\)</span> of the investigated species.</p>
+<div class="math notranslate nohighlight">
+\[\nu = \mu E\]</div>
+<p>This coherent drift induces a phase shift <span class="math notranslate nohighlight">\(\phi-\phi_0\)</span> of the observed NMR resonance, which is directly proportional to the observation time <span class="math notranslate nohighlight">\(\varDelta\)</span>, the magnetic field gradient pulse duration <span class="math notranslate nohighlight">\(\delta\)</span>, the magnetic field gradient pulse strength <span class="math notranslate nohighlight">\(G\)</span>, and the gyromagnetic ratio of the observed nucleus <span class="math notranslate nohighlight">\(\gamma\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\phi - \phi_0 = \gamma G \delta \varDelta \nu\\\end{split}\]</div>
+<p>eNMR combines the spectroscopic selectivity with electrochemistry, enabling the <a class="reference external" href="https://pubs.rsc.org/en/content/articlelanding/cp/2018/c7cp08580j#!divAbstract">determination of electrochemical transference numbers</a> of a plethora of ionic species, which would otherwise not be possible. The determined transference numbers are sign sensitive contrary to transference number estimations from the self-Diffusion coefficient via the Nernst-Einstein equation.
+Furthermore, using eNMR, the correlated migration of uncharged molecules with ions can be observed observing the migration of e.g. <a class="reference external" href="https://pubs.acs.org/doi/abs/10.1021/acs.jpcb.9b11330">complex lithium-oligoether cations</a>, or the <a class="reference external" href="https://onlinelibrary.wiley.com/doi/full/10.1002/mrc.4978">interaction of additives/co-solvents with ions</a> in highly concentrated ionic systems.</p>
+</div>
+<div class="section" id="structure-of-the-package">
+<h2>Structure of the package<a class="headerlink" href="#structure-of-the-package" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>eNMRpy/
+<span class="p">|</span>
+<span class="p">|</span>-- Measurement/
+<span class="p">|</span>   <span class="p">|</span>-- __init__.py
+<span class="p">|</span>   <span class="p">|</span>-- base.py
+<span class="p">|</span>   <span class="p">|</span>-- eNMR_Methods.py
+<span class="p">|</span>   <span class="p">|</span>-- Pavel.py
+<span class="p">|</span>   <span class="p">|</span>-- Emma.py
+<span class="p">|</span>   <span class="p">|</span>-- Juergen1.py
+<span class="p">|</span>   <span class="p">|</span>-- Simulated.py
+<span class="p">|</span>
+<span class="p">|</span>-- __init__.py
+<span class="p">|</span>-- Phasefitting.py
+<span class="p">|</span>-- MOSY.py
+<span class="p">|</span>-- tools.py
+</pre></div>
+</div>
+<p>The submodule Measurement contains all import-related classes while the main module contains the code for the analysis of the respective imported measurement.
+If help es needed in order to adapt the module to a specific experimental setup, please consider a <a class="reference external" href="https://github.com/Flackermann/eNMRpy">pull-request on GitHub</a>.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">eNMRpy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">About eNMRpy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#enmr-basics">eNMR basics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#structure-of-the-package">Structure of the package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">How to…</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Florian Ackermann.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/Introduction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,11 @@
+Phase analysis
+--------------
+
+automatic phase correction
+**************************
+
+Approximation of Lorentzian-shaped function
+*******************************************
+
+MOSY
+****

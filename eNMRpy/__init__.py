@@ -13,10 +13,10 @@ phase analysis via lorentzian fits is available under eNMRpy.Phasefitting, and v
 under eNMRpy.MOSY
 """
 
-from .Phasefitting import SpecModel
-from .MOSY import MOSY
+#from .Phasefitting import SpecModel
+#from .MOSY import MOSY
 # Pavel Class as the Std Import-Class since it is mostly used in our working group
 from .Measurement import Pavel as Import_eNMR_Measurement 
-
-print('%s imported'%__name__)
+from . import tools
+#print('%s imported'%__name__)
 

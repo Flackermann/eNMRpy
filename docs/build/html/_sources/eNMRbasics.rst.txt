@@ -1,0 +1,14 @@
+.. _eNMRbasicspage:
+
+How to...
+=========
+
+Importing and processing an  eNMR measurement
+---------------------------------------------
+
+
+.. code-block::
+
+	import eNMRpy
+	m = eNMRpy.Import_eNMR_Measurement(<path>, <expno>)
+

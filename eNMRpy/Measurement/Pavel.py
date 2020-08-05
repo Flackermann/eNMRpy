@@ -22,7 +22,7 @@ class Pavel(_eNMR_Methods):
     d:
         electrode_distance
     '''
-    def __init__(self, path, expno, dependency='U', alias=None, lineb=5, d=2.2e-2, cell_resistance=None):
+    def __init__(self, path, expno, dependency='U', alias=None, lineb=.3, d=2.2e-2, cell_resistance=None):
         
         self.dependency = dependency
         self.cell_resistance = cell_resistance
