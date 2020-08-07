@@ -154,38 +154,39 @@ def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath
     fixed_parameters: List of parameters to be fixed after the first fit
     '''
     
-    fp = []
-    
-    
-    if fixed_parameters is None:
-        i = 0
+    i=0
+
+    if fixed_parameters is not None:
+        fp = [] # working list of parameter-objects
         
-    elif fixed_parameters is not None:
-        #finds the matching parameter keys
-        if len(fixed_parameters[0]) == 2:
-            fp = fixed_parameters
-        else:
-            for i in range(len(fixed_parameters)):
-                for p in obj_S.params:
-                    if p[0] == fixed_parameters[i]:
-                        fp.append(p)
-                    
-        i = 1 #counter set to one for the rest of the spectra to be fitted
+        # iterates the list of parameters
+        for k in obj_S.params.keys(): 
+            # if the parameter name p[0] matches any string in fixed_parameters
+            if any(k == np.array(fixed_parameters)): 
+                # append the parameter to the working list
+                fp.append(k)                
+        
+        
         fig = obj_S.fit(obj_M.ppm, obj_M.data[0], plot=plot, peak_deconvolution=peak_deconvolution)
+        print('row 0 fitted including fixed_parameters being varied')
         ph_res = obj_S.get_result_values()
         
         for par in ph_res.keys():
-            #obj_M.eNMRraw.set_value(row, par, ph_res[par])
+            # saves the results from row 0 in the eNMRraw-DataFrame
             obj_M.eNMRraw.at[0, par] = ph_res[par]
-            
+        
+        
         for p in fp: # fixes all variables listed in fixed_parameters
+            obj_S.params[p].set(obj_S.result.params[p].value)
             obj_S.params[p].set(vary=False)
             print('%s not varied!'%p)
             
         if (plot is True) and (savepath is not None):
             fig.savefig(savepath+'%.1f'%obj_M.eNMRraw.loc[0, obj_M._x_axis]+'.png', dpi=300)
-    
-    print('start fitting')
+        
+        i = 1 #counter set to one for the rest of the spectra to be fitted
+
+    print('start fitting from row %i'%i)
     
     for row in range(i, obj_M.data[:,0].size):
         fig = obj_S.fit(obj_M.ppm, obj_M.data[row], plot=plot, peak_deconvolution=peak_deconvolution)
@@ -198,11 +199,12 @@ def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath
         if (plot is True) and (savepath is not None):
             fig.savefig(savepath+'%.1f'%obj_M.eNMRraw.loc[row, obj_M._x_axis]+'.png', dpi=300)
             
-    for p in fp: # reset all vary-Values
-        obj_S.params[p].set(vary=True)
+    #for p in fp: # reset all vary-Values
+        #obj_S.params[p].set(vary=True)
     
     
     print('fitting finished')
+    return fp
 
 def drop_errors(df):
     '''
