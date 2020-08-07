@@ -39,13 +39,17 @@ def set_peaks(m, n=-1, timeout=-1, xlim=None, **plot_kwargs): #,xlim=(0,10)
     return arr
 
 
-def peakpicker(x, y=None, width=10, threshold=1e5):
+def peakpicker(x, y=None, inverse_order=False, width=10, threshold=1e5):
     """
     tool to automatically determine peak positions in an x-y spectrum
     
     x: ppm/frequency-array
         x [optional]: Measurement-object of which the first slice is taken
     y: intensity
+    
+    inverse_order:
+        inverts the order of peaks in the array
+        this could be helpful when passing it to make_model
     
     width: scan width. should be even numbered
     
@@ -105,7 +109,11 @@ def peakpicker(x, y=None, width=10, threshold=1e5):
             # i-width//2 ensures that the right coordinates are given for the respective peak
             peaks.append((x[i-width//2], y[i-width//2].real))
     
-    return np.array(peaks)
+    if inverse_order:
+        return np.array(peaks)[::-1]
+    
+    elif not inverse_order:
+        return np.array(peaks)
 
 
 def make_model(peaks, print_params=True):
