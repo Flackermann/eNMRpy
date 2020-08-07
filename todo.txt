@@ -1,4 +1,4 @@
-- reverse-funktionalität in Phasefitting.peakpicker() einbauen.
+- 
 
 - add the parameters from a fitmodel to the measurement object to be saved with save_eNMRpy()
 

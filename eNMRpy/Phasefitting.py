@@ -208,7 +208,6 @@ def fit_Measurement(obj_M, obj_S, fixed_parameters=None, plot=False, savepath=No
     
     
     print('fitting finished')
-    return fp
 
 def drop_errors(df):
     '''

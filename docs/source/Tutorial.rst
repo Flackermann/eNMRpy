@@ -207,6 +207,8 @@ The results of the fit can be found in the measurement objects eNMRraw pandas Da
 
 automatic phase correction
 --------------------------
+It is possible to analyze
+
 
 .. _MOSYpage:
 
