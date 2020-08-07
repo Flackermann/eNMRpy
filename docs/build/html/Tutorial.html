@@ -89,17 +89,24 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#importing-and-processing-the-enmr-spectrum">Importing and processing the eNMR spectrum</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#loading-the-data">loading the data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#important-instance-variables">Important instance variables</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#processing-the-spectrum-fft-linebroadening">Processing the spectrum (FFT, linebroadening)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#plotting-the-spectrum">Plotting the spectrum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#important-instance-variables">Important instance variables</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#phase-analysis">Phase analysis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#automatic-phase-correction">automatic phase correction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#approximation-of-lorentzian-shaped-function">Approximation of Lorentzian-shaped function</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mosy">MOSY</a><ul class="simple">
+<li class="toctree-l3"><a class="reference internal" href="#approximation-of-lorentzian-shaped-function">Approximation of Lorentzian-shaped function</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#peak-picking">Peak picking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#peak-selection-via-gui">Peak selection via GUI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#creating-the-fit-model-and-fitting-the-enmr-measurement">Creating the fit model and fitting the eNMR measurement</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-phase-correction">automatic phase correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mosy">MOSY</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#analyzing-the-signal-intensity-after-phase-correction">Analyzing the signal intensity after phase correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saving-and-importing-measurements">Saving and importing measurements</a><ul class="simple">
 </ul>
 </li>
 </ul>
@@ -172,20 +179,40 @@
             
   <div class="section" id="tutorial">
 <span id="tutorialpage"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The following tutorial follows the typical work-flow analyzing an eNMR measurement.
+Code marked with &gt;&gt;&gt; is input code, while all other lines are the respective output.</p>
 <div class="section" id="importing-and-processing-the-enmr-spectrum">
 <h2>Importing and processing the eNMR spectrum<a class="headerlink" href="#importing-and-processing-the-enmr-spectrum" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="loading-the-data">
 <h3>loading the data<a class="headerlink" href="#loading-the-data" title="Permalink to this headline">¶</a></h3>
 <p>Loading the eNMR data takes place by creating an instance (object) of the respective import class with the respective path and expno of the experiment. This is the most critical point when adapting a different experimental setup to eNMRpy. If you are in need for help, please consider a <a class="reference external" href="https://github.com/Flackermann/eNMRpy">pull request on GitHub</a>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">eNMRpy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">eNMRpy</span><span class="o">.</span><span class="n">Import_eNMR_Measurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">expno</span><span class="p">,</span> <span class="n">dependency</span><span class="o">=</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="n">lineb</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">2.2e-2</span><span class="p">,</span> <span class="n">cell_resistance</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">eNMRpy</span><span class="o">.</span><span class="n">Import_eNMR_Measurement</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">expno</span><span class="p">,</span> <span class="n">dependency</span><span class="o">=</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="n">lineb</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="mf">2.2e-2</span><span class="p">,</span> <span class="n">cell_resistance</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="processing-the-spectrum-fft-linebroadening">
+<h3>Processing the spectrum (FFT, linebroadening)<a class="headerlink" href="#processing-the-spectrum-fft-linebroadening" title="Permalink to this headline">¶</a></h3>
+<p>Usually, the imported data represents the free induction decay (FID), recorded for the eNMR measurements.
+In order to analyze the eNMR measurement, the FID needs to be transformed into a spectrum via Fast Fourier
+Transformation (FFT) via the .proc() method.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">proc</span><span class="p">(</span><span class="n">linebroadening</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phc0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">phc1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</pre></div>
+</div>
+<p>This method transforms the self.data array from the FID to the spectrum. phc0 and phc1 give the zero and first order phase correction. If xmin and/or xmin are not None, self.set_spectral_region() will be called with the given limits.</p>
+<p><strong>Note:</strong> Please keep in mind, that self.data is changed. It should always be used directly after loading the raw data. Therefore, it is good practice to write self.proc() in the same cell within a jupyter notebook, in order to obtain the correct spectrum after each execution of the respective cell.</p>
+</div>
+<div class="section" id="plotting-the-spectrum">
+<h3>Plotting the spectrum<a class="headerlink" href="#plotting-the-spectrum" title="Permalink to this headline">¶</a></h3>
+<p>After loading the raw data, and processing the spectrum, we want to have a look at the result by plotting the spectrum via the method self.plot_spec(). This method returns a matplotlib figure, <a class="reference external" href="https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.figure.html">which can be used as usual</a>. The first argument in self.plot_spec() can be an integer or an array of integers, in order to plot multiple rows of the 2D spectrum on top of each other.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fullspec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">plot_spec</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">));</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="important-instance-variables">
 <h3>Important instance variables<a class="headerlink" href="#important-instance-variables" title="Permalink to this headline">¶</a></h3>
 <table class="docutils align-default" id="id1">
-<caption><span class="caption-text">important instance variables of the .Pavel()-class <em>(atm standard import class)</em></span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<caption><span class="caption-text">important instance variables of the measurement object (in this example <strong>m</strong>) from the .Pavel()-class <em>(atm standard import class)</em></span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 25%" />
 <col style="width: 75%" />
@@ -242,28 +269,89 @@ data for all eNMR experiments</p></td>
 </tbody>
 </table>
 </div>
-<div class="section" id="processing-the-spectrum-fft-linebroadening">
-<h3>Processing the spectrum (FFT, linebroadening)<a class="headerlink" href="#processing-the-spectrum-fft-linebroadening" title="Permalink to this headline">¶</a></h3>
-<p>Usually, the imported data represents the free induction decay (FID), recorded for the eNMR measurements.
-In order to analyze the eNMR measurement, the FID needs to be transformed into a spectrum via Fast Fourier
-Transformation (FFT) via the .proc() method</p>
-</div>
-<div class="section" id="plotting-the-spectrum">
-<h3>Plotting the spectrum<a class="headerlink" href="#plotting-the-spectrum" title="Permalink to this headline">¶</a></h3>
-</div>
 </div>
 <div class="section" id="phase-analysis">
 <h2>Phase analysis<a class="headerlink" href="#phase-analysis" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="automatic-phase-correction">
-<h3>automatic phase correction<a class="headerlink" href="#automatic-phase-correction" title="Permalink to this headline">¶</a></h3>
-</div>
+<p>eNMRpy comes with three different methods for the determination of the electrophoretic mobility.
+a) <a class="reference internal" href="#lorentzpage"><span class="std std-ref">Fitting of Lorentzians</span></a>, b) <a class="reference internal" href="#autophasepage"><span class="std std-ref">automatic phase correction</span></a>, and c) <a class="reference internal" href="#mosypage"><span class="std std-ref">Mobility Ordered SpectroscopY (MOSY)</span></a>.</p>
 <div class="section" id="approximation-of-lorentzian-shaped-function">
-<h3>Approximation of Lorentzian-shaped function<a class="headerlink" href="#approximation-of-lorentzian-shaped-function" title="Permalink to this headline">¶</a></h3>
+<span id="lorentzpage"></span><h3>Approximation of Lorentzian-shaped function<a class="headerlink" href="#approximation-of-lorentzian-shaped-function" title="Permalink to this headline">¶</a></h3>
+<p>In order to analyze the phase shift via the approximation of Lorentzian shaped profiles, one has to import the submodule <em>Phasefitting</em> accordingly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eNMRpy</span> <span class="kn">import</span> <span class="n">Phasefitting</span> <span class="k">as</span> <span class="n">phf</span>
+</pre></div>
+</div>
+<p>Two methods exist for the creation of the <a class="reference external" href="https://github.com/lmfit/lmfit-py">lmfit</a> fit model.</p>
+<div class="section" id="peak-picking">
+<h4>Peak picking<a class="headerlink" href="#peak-picking" title="Permalink to this headline">¶</a></h4>
+<p>The first model uses the peakpicker() function contained in the Phasefitting module to obtain an array (in this example <em>peaks</em>) listing the peaks picked. The peakpicker() function needs the x-coordinate (<em>m.ppm</em>) and y-coordinate (here the first spectral row <em>m.data[0]</em> of the measurement object <em>m</em>), and a threshold below which no peak is picked:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">peaks</span> <span class="o">=</span> <span class="n">phf</span><span class="o">.</span><span class="n">peakpicker</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ppm</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1e5</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="peak-selection-via-gui">
+<h4>Peak selection via GUI<a class="headerlink" href="#peak-selection-via-gui" title="Permalink to this headline">¶</a></h4>
+<p>Since the peak picking approach is not always reliable, one can use a GUI for the selection of the individual peaks.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="o">%</span><span class="n">matplotlib</span>  <span class="n">qt5</span>          <span class="c1"># enables matplotlib to open a GUI outside of the jupyter notebook</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peaks</span> <span class="o">=</span> <span class="n">phf</span><span class="o">.</span><span class="n">set_peaks</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>  <span class="c1"># starts the GUI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>        <span class="c1"># returns to the inline-plotting mode for the jupyter notebook</span>
+</pre></div>
+</div>
+<p>Peaks are selected by a left-click, the last peak can be deleted via a right-click. <strong>Note:</strong> that the red crosses correspond to the clicking points, where the peaks were selected. This is important for estimating the peak’s amplitude. <strong>Note:</strong> It is important to close the GUI by either clicking the middle bouse button, or pressing &lt;enter&gt; on the keyboard. Otherwise, the jupyter notebook may be stuck in a while loop.</p>
+<a class="reference internal image-reference" href="_images/peakpickerGUI.png"><img alt="set_peaks() GUI" src="_images/peakpickerGUI.png" style="width: 600px;" /></a>
+</div>
+<div class="section" id="creating-the-fit-model-and-fitting-the-enmr-measurement">
+<h4>Creating the fit model and fitting the eNMR measurement<a class="headerlink" href="#creating-the-fit-model-and-fitting-the-enmr-measurement" title="Permalink to this headline">¶</a></h4>
+<p>The <em>peaks</em> array, obtained via one of the two methods described above, is then passed to the <em>make_model()</em> wrapper function, returning an instance of the lmfit.Model()-class (named <em>model</em> in this example) including the correct parameters set, and Lorentzian function.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">phf</span><span class="o">.</span><span class="n">make_model</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">print_params</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A key aspect of the fitting method is to introduce physically meaningful restrictions to the fitmodel by defining dependencies between parameters. The most straightforward restriction is to set signal phases corresponding to the same molecule equal by using the method self.set_mathematical_constraints(). In this example, <em>ph0 = ph1 = ph2</em> hence, only <em>ph2</em> is varied in the following fit. (see self.params.pretty_print())</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">set_mathematical_constraints</span><span class="p">([</span><span class="s1">&#39;ph0=ph1&#39;</span><span class="p">,</span> <span class="s1">&#39;ph1=ph2&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The set of parameter can be investigated via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">pretty_print</span><span class="p">()</span>
+<span class="go">Name         Value      Min      Max   Stderr     Vary     Expr Brute_Step</span>
+<span class="go">a0        2.107e+04        0      inf     None     True     None     None</span>
+<span class="go">a1        1.927e+04        0      inf     None     True     None     None</span>
+<span class="go">a2        1.867e+04        0      inf     None     True     None     None</span>
+<span class="go">baseline         1     -inf      inf     None     True     None     None</span>
+<span class="go">l0            0.01        0      inf     None     True     None     None</span>
+<span class="go">l1            0.01        0      inf     None     True     None     None</span>
+<span class="go">l2            0.01        0      inf     None     True     None     None</span>
+<span class="go">ph0              1     -180      180     None    False      ph1     None</span>
+<span class="go">ph1              1     -180      180     None    False      ph2     None</span>
+<span class="go">ph2              1     -180      180     None     True     None     None</span>
+<span class="go">v0           4.985     -inf      inf     None     True     None     None</span>
+<span class="go">v1           5.063     -inf      inf     None     True     None     None</span>
+<span class="go">v2           6.137     -inf      inf     None     True     None     None</span>
+</pre></div>
+</div>
+<p>Furthermore, it is possible to <a class="reference external" href="https://lmfit.github.io/lmfit-py/parameters.html">manipulate single parameters</a> according to the documentation of the lmfit package.</p>
+<p>The initial spectrum can be plotted via model.plot_init_spec(), which takes the x-coordinate <em>m.ppm</em> and as an optional argument the 1D figure <em>fullspec</em></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fullspec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">plot_spec</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">plot_init_spec</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ppm</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="n">fullspec</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In order to fit an eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object <em>m</em>, and the fit model <em>model</em>. Using this function, all eNMR spectra in <em>m</em> are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="go">&gt;&gt;&gt;phf.fit_Measurement(m, model)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="automatic-phase-correction">
+<span id="autophasepage"></span><h3>automatic phase correction<a class="headerlink" href="#automatic-phase-correction" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="mosy">
-<h3>MOSY<a class="headerlink" href="#mosy" title="Permalink to this headline">¶</a></h3>
-<div class="toctree-wrapper compound">
+<span id="mosypage"></span><h3>MOSY<a class="headerlink" href="#mosy" title="Permalink to this headline">¶</a></h3>
 </div>
+</div>
+<div class="section" id="analyzing-the-signal-intensity-after-phase-correction">
+<h2>Analyzing the signal intensity after phase correction<a class="headerlink" href="#analyzing-the-signal-intensity-after-phase-correction" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="saving-and-importing-measurements">
+<h2>Saving and importing measurements<a class="headerlink" href="#saving-and-importing-measurements" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
 </div>
 </div>
 </div>
