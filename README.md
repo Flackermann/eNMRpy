@@ -4,7 +4,7 @@ This package is a nifty tool for the import and analysis of electrophoretic NMR(
 For contributions and questions, please consider the <a href="https://github.com/Flackermann/eNMRpy">GitHub repository</a>.
 When using this for scientific pusposes, please cite <a href="https://doi.org/10.1002/mrc.4978">this paper</a>.
 
-Further documentation will be available soon.
+For documentation please read <a href="https://enmrpy.readthedocs.io/en/testbranch/"> the read the docs page</a>.
 
 
 # Installation
