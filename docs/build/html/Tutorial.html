@@ -334,19 +334,21 @@ a) <a class="reference internal" href="#lorentzpage"><span class="std std-ref">F
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="_images/init_spec.png"><img alt="spectrum with initial fit parameters" src="_images/init_spec.png" style="width: 600px;" /></a>
-<p>A test-fit of the first spectrum can be achieved using:</p>
+<p>In order to see, whether the initial parameters are well-chosen resulting in a converging fit, a test-fit of the first spectrum can be achieved using the self.fit() method of the fit-model:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ppm</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">);</span>
 </pre></div>
 </div>
-<a class="reference internal image-reference" href="_images/testfit.png"><img alt="test fit of the fist spectrum" src="_images/testfit.png" style="width: 300px;" /></a>
-<p>In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object <em>m</em>, and the fit model <em>model</em>. Using this function, all eNMR spectra in <em>m</em> are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="go">&gt;&gt;&gt;phf.fit_Measurement(m, model)</span>
+<a class="reference internal image-reference" href="_images/testfit.png"><img alt="test fit of the fist spectrum" src="_images/testfit.png" style="width: 400px;" /></a>
+<p>In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object <em>m</em>, and the fit model <em>model</em>. Using this function, all eNMR spectra in <em>m</em> are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame. <strong>Note:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">phf</span><span class="o">.</span><span class="n">fit_Measurement</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parse_complex</span><span class="o">=</span><span class="s1">&#39;real&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The results of the fit can be found in the measurement objects eNMRraw pandas DataFrame. In this example <em>m.eNMRraw</em>.</p>
 </div>
 </div>
 <div class="section" id="automatic-phase-correction">
 <span id="autophasepage"></span><h3>automatic phase correction<a class="headerlink" href="#automatic-phase-correction" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to analyze</p>
 </div>
 <div class="section" id="mosy">
 <span id="mosypage"></span><h3>MOSY<a class="headerlink" href="#mosy" title="Permalink to this headline">¶</a></h3>

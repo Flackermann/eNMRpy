@@ -185,29 +185,30 @@ The initial spectrum can be plotted via model.plot_init_spec(), which takes the 
    :width: 600
    :alt: spectrum with initial fit parameters
 
-A test-fit of the first spectrum can be achieved using:
+In order to see, whether the initial parameters are well-chosen resulting in a converging fit, a test-fit of the first spectrum can be achieved using the self.fit() method of the fit-model:
 
 .. code-block:: python
 
     >>> model.fit(m.ppm, m.data[0], plot=True);
 
 .. image:: images/testfit.png
-   :width: 300
+   :width: 400
    :alt: test fit of the fist spectrum
 
-In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object *m*, and the fit model *model*. Using this function, all eNMR spectra in *m* are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame. 
+In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object *m*, and the fit model *model*. Using this function, all eNMR spectra in *m* are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame. **Note:** 
 
 .. code-block:: python
 
-    >>>phf.fit_Measurement(m, model)
-
+    >>> phf.fit_Measurement(m, model, plot=False, parse_complex='real')
     
-    
+The results of the fit can be found in the measurement objects eNMRraw pandas DataFrame. In this example *m.eNMRraw*.
 
 .. _autophasepage:
 
 automatic phase correction
 --------------------------
+It is possible to analyze
+
 
 .. _MOSYpage:
 
