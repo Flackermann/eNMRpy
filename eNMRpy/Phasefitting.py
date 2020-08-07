@@ -145,13 +145,17 @@ def reduce_fitted_phases(Measurementobject, SpecModel):
         m.eNMRraw[k+'reduced'] = m.eNMRraw[k]*m.d/m.delta/m.Delta/m.g/m.gamma
         m.eNMRraw[k+'reduced'] -= m.eNMRraw.loc[m.eNMRraw['U / [V]']==0, k+'reduced'][0]
 
-def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath=None, fixed_parameters=None):
+def fit_Measurement(obj_M, obj_S, fixed_parameters=None, plot=False, savepath=None, **plot_kwargs):
     '''
     function to fit a the series of voltage dependent spectra contained in a typical eNMR measurement
     
     obj_M: object of the class eNMR_Measurement
     obj_S: object of the class SpecModel
     fixed_parameters: List of parameters to be fixed after the first fit
+    
+    **plot_kwargs are passed to SpecModel.fit:
+        peak_deconvolution=False, parse_complex='abs','real, or 'imag'
+    
     '''
     
     i=0
@@ -167,7 +171,7 @@ def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath
                 fp.append(k)                
         
         
-        fig = obj_S.fit(obj_M.ppm, obj_M.data[0], plot=plot, peak_deconvolution=peak_deconvolution)
+        fig = obj_S.fit(obj_M.ppm, obj_M.data[0], **plot_kwargs)
         print('row 0 fitted including fixed_parameters being varied')
         ph_res = obj_S.get_result_values()
         
@@ -189,7 +193,7 @@ def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath
     print('start fitting from row %i'%i)
     
     for row in range(i, obj_M.data[:,0].size):
-        fig = obj_S.fit(obj_M.ppm, obj_M.data[row], plot=plot, peak_deconvolution=peak_deconvolution)
+        fig = obj_S.fit(obj_M.ppm, obj_M.data[row], plot=plot, **plot_kwargs)
         ph_res = obj_S.get_result_values()
         
         for par in ph_res.keys():
@@ -504,12 +508,15 @@ class SpecModel(object):
             
         return fig
     
-    def fit(self, xdata, ydata, plot=False, peak_deconvolution=False):
+    def fit(self, xdata, ydata, plot=False, peak_deconvolution=False, parse_complex='real', figsize=None):
         """
         method to fit a single spectrum consisting of xdata and ydata
         with the previously defined model and parameters
         
         stores the result in self.result
+        
+        parse_complex: representation of the complex data when plotting
+            "real", "imag", or "abs"
         
         returns a matplotlib figure if plot=True
         """
@@ -519,8 +526,11 @@ class SpecModel(object):
         
         fig = None
         if plot:
-            fig = self.result.plot()[0]
-        
+            fig = self.result.plot(parse_complex=parse_complex)[0]
+            if figsize != None:
+                fig = plt.gcf()
+                fig.set_size_inches(figsize)
+            
         if peak_deconvolution and plot:
             ax = fig.gca()
             for n in range(self.n):

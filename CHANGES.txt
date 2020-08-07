@@ -1,5 +1,10 @@
 Version 0.0.3
 -------------
+- Error fixed when fixing a parameter after fitting the first row. Works now as intended
+
+- option figsize added to the plotting functionality of SpecModel.fit()
+    - parse_complex option added --> see docstring
+
 - sphinx-frame for documentation added
 
 - changed auto-imports in __init__ when importing eNMRpy

@@ -132,8 +132,8 @@ Since the peak picking approach is not always reliable, one can use a GUI for th
 Peaks are selected by a left-click, the last peak can be deleted via a right-click. **Note:** that the red crosses correspond to the clicking points, where the peaks were selected. This is important for estimating the peak's amplitude. **Note:** It is important to close the GUI by either clicking the middle bouse button, or pressing <enter> on the keyboard. Otherwise, the jupyter notebook may be stuck in a while loop.
 
 .. image:: images/peakpickerGUI.png
-  :width: 600
-  :alt: set_peaks() GUI
+   :width: 600
+   :alt: set_peaks() GUI
 
 Creating the fit model and fitting the eNMR measurement
 .......................................................
@@ -181,7 +181,21 @@ The initial spectrum can be plotted via model.plot_init_spec(), which takes the 
     >>> fullspec = m.plot_spec(0); 
     >>> model.plot_init_spec(m.ppm, fig=fullspec);
     
-In order to fit an eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object *m*, and the fit model *model*. Using this function, all eNMR spectra in *m* are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame. 
+.. image:: images/init_spec.png
+   :width: 600
+   :alt: spectrum with initial fit parameters
+
+A test-fit of the first spectrum can be achieved using:
+
+.. code-block:: python
+
+    >>> model.fit(m.ppm, m.data[0], plot=True);
+
+.. image:: images/testfit.png
+   :width: 300
+   :alt: test fit of the fist spectrum
+
+In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object *m*, and the fit model *model*. Using this function, all eNMR spectra in *m* are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame. 
 
 .. code-block:: python
 

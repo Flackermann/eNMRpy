@@ -13,7 +13,7 @@ setup(
    long_description=open('README.md').read(),
    install_requires=[
        "nmrglue",
-       "lmfit",
+       "lmfit>=1.0.1",
        "pandas",
        "matplotlib>=3.1.3",
        "numpy",
