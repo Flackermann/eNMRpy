@@ -95,6 +95,9 @@ Phase analysis
 **************
 eNMRpy comes with three different methods for the determination of the electrophoretic mobility.
 a) :ref:`Fitting of Lorentzians <lorentzpage>`, b) :ref:`automatic phase correction <autophasepage>`, and c) :ref:`Mobility Ordered SpectroscopY (MOSY) <MOSYpage>`.
+A brief description of all these methods can be found in the linked `open access article <https://onlinelibrary.wiley.com/doi/full/10.1002/mrc.4978>`_ published in *Magnetic Resonance in Chemistry* by Wiley.
+
+
 
 
 .. _lorentzpage:
@@ -109,6 +112,12 @@ In order to analyze the phase shift via the approximation of Lorentzian shaped p
 
 Two methods exist for the creation of the `lmfit <https://github.com/lmfit/lmfit-py>`_ fit model.
 
+
+
+
+
+
+
 Peak picking
 ............
 
@@ -118,6 +127,13 @@ The first model uses the peakpicker() function contained in the Phasefitting mod
 
     >>> peaks = phf.peakpicker(m.ppm, m.data[0], threshold=1e5)
 
+
+    
+    
+    
+    
+    
+    
 Peak selection via GUI
 ......................
 
@@ -135,6 +151,10 @@ Peaks are selected by a left-click, the last peak can be deleted via a right-cli
    :width: 600
    :alt: set_peaks() GUI
 
+
+   
+   
+   
 Creating the fit model and fitting the eNMR measurement
 .......................................................
   
@@ -205,25 +225,214 @@ The results of the fit can be found in the measurement objects eNMRraw pandas Da
 
 .. _autophasepage:
 
-automatic phase correction
---------------------------
-It is possible to analyze
 
+
+
+
+
+
+Automatic phase correction
+--------------------------
+A simple way to analyze the phase shift is the analysis via zero order phase correction. Here, a very straight forward phase correction algorithm described `earlier <https://www.sciencedirect.com/science/article/pii/S1090780702000691>`_ is employed. The implementation of this method `was adapted from the nmrglue package <https://nmrglue.readthedocs.io/en/latest/reference/proc_autophase.html>`_ and altered in order to match the scope of this work.
+
+The method self.autophase_phase_analysis() is executed, and automatically starts the analysis while storing the results in the self.eNMRraw pandas-DataFrame in the "ph0acme" column.
+
+.. code-block:: python
+
+   >>> m.autophase_phase_analysis()
+   
+**Note:** This method is a quick analysis which is only applicable to spectra exhibiting resonances of a single substance, where no superposition of signals with different phase shifts is expected.
 
 .. _MOSYpage:
 
-MOSY
-----
 
 
+
+
+
+
+Mobility Ordered SpectroscopY MOSY
+----------------------------------
+
+MOSY is a 2D Fouriertransformation-based technique for the analysis of the electrophoretic mobility :math:`\mu`, where the signal intensity is described via
+
+.. math::
+
+   S(\omega) = S_0 \left[ A(\omega) + iD(\omega) \right] \left[ \cos(\gamma \delta \varDelta G \mu E) + i \sin(\gamma \delta \varDelta G \mu E) \right]
+
+In order to perform the fourier transformation, the module MOSY has to be imported, the *mosy* object is created from the MOSY.MOSY()-class, and processed via the self.calc_MOSY()-method
+
+.. code-block:: python
+
+   >>> from eNMRpy import MOSY
+   >>> mosy = MOSY.MOSY(m)
+   >>> mosy.calc_MOSY()
+   zero filling started!
+   (11, 1967) (4096, 1967)
+   zero filling finished!
+   done
+
+In order to view the result, the method self.plot_MOSY() can be used returning a matplotlib figure named *mosyfig* in this example. **Note:** The xlim is set in from high to low values, as it is common in NMR spectroscopy.
+   
+.. code-block:: python
+   
+   >>> mosyfig = mosy.plot_MOSY(xlim=(7,4))
+
+This plot results in the following figure showing the full spectrum, including truncation artifacts etc.:
+
+.. image:: images/mosyunscaled.png
+   :width: 400
+   :alt: raw mosy spectrum
+   
+In order to clean up the MOSY spectrum, one can rescale the figure accordingly:
+
+.. code-block:: python
+   
+   >>> import numpy as np
+
+   >>> zoom = 1e6
+   >>> base = 1.39 #changes the distance of the lines -- base of the exponential term
+   >>> number_of_lines = 10
+
+   >>> mosyfig = mosy.plot_MOSY(xlim=(6.5,4.6), ylim=(-2.5e-9, 2.5e-9), figsize=(10,5),
+   >>>                          levels=zoom*base**np.linspace(0,10,number_of_lines))
+
+Leading to the following figure:
+
+.. image:: images/mosy_scaled.png
+   :width: 600
+   :alt: rescaled mosy spectrum
+   
+   
+In order to determine the position of the peaks, and therefore the mobility, it is recommended to plot slices in the mobility domain of the peaks on top of each other.
+For this reason, a list containing the chemical shifts of the peaks is necessary. This list can either be created manually, or by using the automatic peakpicker tool, or the GUI explained above.
+
+.. code-block:: python
+   
+   >>> from eNMRpy.Phasefitting import peakpicker
+   >>> peaks = peakpicker(m.ppm, m.data[0]) # list of peaks with [[ppm, intensity],..]. 
+   >>> slices_ppm = peaks[:,0]              # Only chemical shifts are returned from peaks via peaks[:,0]
+
+The figure containing the MOSY slices is then created via the self.plot_slices_F1() method.
+
+.. code-block:: python
+   
+   mosyslicefig = mosy.plot_slices_F1(slices_ppm)
+
+.. image:: images/mosyslicefig.png
+   :width: 600
+   :alt: raw slices of mosy spectrum
+
+This figure shows the strong sync-modulation originating from a truncated FID and FFT in the mobility dimension. Rescaling the image, and autopicking and annotating the peaks with their respective mobility yields the following:
+   
+.. code-block:: python
+   
+   mosyslicefig = mosy.plot_slices_F1(peaks[:,0], xlim =(-2.5e-9, 2.5e-9) ,annotate=True)
+
+.. image:: images/mosyslicefig_annotated.png
+   :width: 600
+   :alt: rescaled and annotated slices of mosy spectrum
+   
+   
+**Note:** Even though the mobilities of all three peaks do not completely agree. this may be the case due to an insufficient digitization of the peak, which may be corrected by a higher zerofilling in self.calc_MOSY(), but also shows the limitations of MOSY analysis on substances exhibiting only a small phase shift range. It is however very helpful for complex spectra with large phase shift-ranges and a multitude of components with different mobilities, and also has the capability to resolve a superposition of two or more mobilities modulating a single NMR resonance.
+
+
+
+
+
+Calculating the mobility from phase data
+****************************************
+In order to calculate the mobility, a linear regression has to be performed on the phase data in the eNMR measurement object, here *m*.
+For this reason, the method self.lin_huber() is used as a robust lin. regression method using the least squares approach with a threshold *epsilon*, looking for outliers.
+Here, it is reasonable to set the threshold to 3, in order to include all data points assuming a large scattering of the phase values. Data points which are excluded from the linear regression are depicted as red dots when using *self.lin_display()*.
+*y_column* sets the variable to be fitted and displayed. The phase variables from the fit model are named *ph0, ph1, ph2, [...]*, while the phase variable originating from the autophase method is named *ph0acme*.
+
+.. code-block:: python
+
+   >>> m.lin_huber(epsilon=3, y_column='ph0')
+   >>> m.lin_display(y_column='ph0')
+
+.. image:: images/linearreg.png
+   :width: 400
+   :alt: display of the linear regression
+
+Consecutively, the mobility can be determined. Note that the electrode_distance is crucial for the calculation of the mobility. If not altered, the standard value of 2.2e-2 meters will be taken.
+
+.. code-block:: python
+
+   >>> (mobility, error) = m.mobility(y_column='ph0')
+   1.38E-09 (m^2/Vs) +- 6.45E-11
+
+In order to display multiple fitted phases on top of each other use:
+.. code-block:: python
+
+   >>> comparephasefig = m.lin_results_display(['ph0', 'ph0acme'])
+
+.. image:: images/phasecomparison.png
+   :width: 600
+   :alt: comparison of fitted phase and autocorrected phase
+   
+   
 Analyzing the signal intensity after phase correction
 *****************************************************
+In order to identify possible experimental artifacts, the evolution of the signal intensity can be investigated by correcting all spectra for their determined signal phase, making them fully absorptive, and consecutive integration.
+
+.. code-block:: python
+
+   >>> intensityfig, integrationresults = m.analyze_intensity(ph_var='ph0')
+
+            U  intensity         ph
+    0     0.0   1.000000 -13.653589
+    1   -60.0   0.778901 -22.025162
+    2    60.0   0.758279   0.597989
+    3   -30.0   0.807881 -18.331584
+    4    30.0   0.948111  -6.251822
+    5   -50.0   0.748151 -21.568244
+    6    50.0   0.711298  -5.904790
+    7   -40.0   0.942212 -15.254777
+    8    40.0   0.823194  -6.118121
+    9  -100.0   0.595154 -30.651999
+    10  100.0   0.499146  12.829012
+    11  -20.0   0.940226 -14.515923
+    12   70.0   0.579074  -1.227382
+    13  -70.0   0.639213 -26.243095
+    14   20.0   0.881509 -11.049295
+    15  -80.0   0.657257 -26.869181
+    16   80.0   0.533540   1.642832
+    17  -10.0   0.965522 -13.948664
+    18   90.0   0.537945   8.729907
+    19  -90.0   0.585712 -29.861292
+    20   10.0   0.866894 -13.439502
+    
+.. image:: images/intensityfig.png
+   :width: 600
+   :alt: intensity figure
 
 
-
+   
 Saving and importing measurements
 *********************************
+After evaluating an eNMR measurement, the spectral data and phase results can be stored in a .eNMRpy file.
 
+.. code-block:: python
+
+    m.save_eNMRpy(path)
+    
+In order to save only the self.eNMRraw table in excel format, use:
+
+.. code-block:: python
+
+   m.eNMRraw.to_excel(path)
+
+Loading past results works this way:
+
+.. code-block:: python
+
+    from eNMRpy import tools
+    
+    m_imported = tools.Load_eNMRpy_data('measurement_test.eNMRpy')
+
+The loaded results can be used in almost any way, as its original measurement object. This way of loading measurements is intended to archive several evaluation versions of the same or different measurements, and load them at some time in the future for comparison or plotting reasons.
 
 
 .. toctree::

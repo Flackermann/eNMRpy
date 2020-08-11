@@ -1,5 +1,9 @@
 Version 0.0.3
 -------------
+- mobility()-method now returns a tuple of values (mobility, error), instead of a tuple of numpy arrays (np.array(mobility), np.array(error))
+
+- MOSY-class was fixed to be compatible with newer pandas versions
+
 - Error fixed when fixing a parameter after fitting the first row. Works now as intended
 
 - option figsize added to the plotting functionality of SpecModel.fit()

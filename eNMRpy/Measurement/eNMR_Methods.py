@@ -845,5 +845,5 @@ class _eNMR_Methods(Measurement):
         if verbose:
             print ('%.2E (m^2/Vs)'%self.mu[0],'+- %.2E'%(self.mu*(self.sig_m/self.m)))
         
-        return self.mu, self.mu*(self.sig_m/self.m)
+        return self.mu[0], self.mu[0]*(self.sig_m/self.m[0])
 

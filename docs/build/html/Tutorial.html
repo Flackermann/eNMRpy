@@ -101,10 +101,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#creating-the-fit-model-and-fitting-the-enmr-measurement">Creating the fit model and fitting the eNMR measurement</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#automatic-phase-correction">automatic phase correction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mosy">MOSY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#automatic-phase-correction">Automatic phase correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mobility-ordered-spectroscopy-mosy">Mobility Ordered SpectroscopY MOSY</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#calculating-the-mobility-from-phase-data">Calculating the mobility from phase data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#analyzing-the-signal-intensity-after-phase-correction">Analyzing the signal intensity after phase correction</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#saving-and-importing-measurements">Saving and importing measurements</a><ul class="simple">
 </ul>
@@ -273,7 +274,8 @@ data for all eNMR experiments</p></td>
 <div class="section" id="phase-analysis">
 <h2>Phase analysis<a class="headerlink" href="#phase-analysis" title="Permalink to this headline">¶</a></h2>
 <p>eNMRpy comes with three different methods for the determination of the electrophoretic mobility.
-a) <a class="reference internal" href="#lorentzpage"><span class="std std-ref">Fitting of Lorentzians</span></a>, b) <a class="reference internal" href="#autophasepage"><span class="std std-ref">automatic phase correction</span></a>, and c) <a class="reference internal" href="#mosypage"><span class="std std-ref">Mobility Ordered SpectroscopY (MOSY)</span></a>.</p>
+a) <a class="reference internal" href="#lorentzpage"><span class="std std-ref">Fitting of Lorentzians</span></a>, b) <a class="reference internal" href="#autophasepage"><span class="std std-ref">automatic phase correction</span></a>, and c) <a class="reference internal" href="#mosypage"><span class="std std-ref">Mobility Ordered SpectroscopY (MOSY)</span></a>.
+A brief description of all these methods can be found in the linked <a class="reference external" href="https://onlinelibrary.wiley.com/doi/full/10.1002/mrc.4978">open access article</a> published in <em>Magnetic Resonance in Chemistry</em> by Wiley.</p>
 <div class="section" id="approximation-of-lorentzian-shaped-function">
 <span id="lorentzpage"></span><h3>Approximation of Lorentzian-shaped function<a class="headerlink" href="#approximation-of-lorentzian-shaped-function" title="Permalink to this headline">¶</a></h3>
 <p>In order to analyze the phase shift via the approximation of Lorentzian shaped profiles, one has to import the submodule <em>Phasefitting</em> accordingly:</p>
@@ -347,18 +349,139 @@ a) <a class="reference internal" href="#lorentzpage"><span class="std std-ref">F
 </div>
 </div>
 <div class="section" id="automatic-phase-correction">
-<span id="autophasepage"></span><h3>automatic phase correction<a class="headerlink" href="#automatic-phase-correction" title="Permalink to this headline">¶</a></h3>
-<p>It is possible to analyze</p>
+<span id="autophasepage"></span><h3>Automatic phase correction<a class="headerlink" href="#automatic-phase-correction" title="Permalink to this headline">¶</a></h3>
+<p>A simple way to analyze the phase shift is the analysis via zero order phase correction. Here, a very straight forward phase correction algorithm described <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S1090780702000691">earlier</a> is employed. The implementation of this method <a class="reference external" href="https://nmrglue.readthedocs.io/en/latest/reference/proc_autophase.html">was adapted from the nmrglue package</a> and altered in order to match the scope of this work.</p>
+<p>The method self.autophase_phase_analysis() is executed, and automatically starts the analysis while storing the results in the self.eNMRraw pandas-DataFrame in the “ph0acme” column.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">autophase_phase_analysis</span><span class="p">()</span>
+</pre></div>
 </div>
-<div class="section" id="mosy">
-<span id="mosypage"></span><h3>MOSY<a class="headerlink" href="#mosy" title="Permalink to this headline">¶</a></h3>
+<p><strong>Note:</strong> This method is a quick analysis which is only applicable to spectra exhibiting resonances of a single substance, where no superposition of signals with different phase shifts is expected.</p>
 </div>
+<div class="section" id="mobility-ordered-spectroscopy-mosy">
+<span id="mosypage"></span><h3>Mobility Ordered SpectroscopY MOSY<a class="headerlink" href="#mobility-ordered-spectroscopy-mosy" title="Permalink to this headline">¶</a></h3>
+<p>MOSY is a 2D Fouriertransformation-based technique for the analysis of the electrophoretic mobility <span class="math notranslate nohighlight">\(\mu\)</span>, where the signal intensity is described via</p>
+<div class="math notranslate nohighlight">
+\[S(\omega) = S_0 \left[ A(\omega) + iD(\omega) \right] \left[ \cos(\gamma \delta \varDelta G \mu E) + i \sin(\gamma \delta \varDelta G \mu E) \right]\]</div>
+<p>In order to perform the fourier transformation, the module MOSY has to be imported, the <em>mosy</em> object is created from the MOSY.MOSY()-class, and processed via the self.calc_MOSY()-method</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eNMRpy</span> <span class="kn">import</span> <span class="n">MOSY</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mosy</span> <span class="o">=</span> <span class="n">MOSY</span><span class="o">.</span><span class="n">MOSY</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mosy</span><span class="o">.</span><span class="n">calc_MOSY</span><span class="p">()</span>
+<span class="go">zero filling started!</span>
+<span class="go">(11, 1967) (4096, 1967)</span>
+<span class="go">zero filling finished!</span>
+<span class="go">done</span>
+</pre></div>
+</div>
+<p>In order to view the result, the method self.plot_MOSY() can be used returning a matplotlib figure named <em>mosyfig</em> in this example. <strong>Note:</strong> The xlim is set in from high to low values, as it is common in NMR spectroscopy.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mosyfig</span> <span class="o">=</span> <span class="n">mosy</span><span class="o">.</span><span class="n">plot_MOSY</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This plot results in the following figure showing the full spectrum, including truncation artifacts etc.:</p>
+<a class="reference internal image-reference" href="_images/mosyunscaled.png"><img alt="raw mosy spectrum" src="_images/mosyunscaled.png" style="width: 400px;" /></a>
+<p>In order to clean up the MOSY spectrum, one can rescale the figure accordingly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zoom</span> <span class="o">=</span> <span class="mf">1e6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">base</span> <span class="o">=</span> <span class="mf">1.39</span> <span class="c1">#changes the distance of the lines -- base of the exponential term</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">number_of_lines</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mosyfig</span> <span class="o">=</span> <span class="n">mosy</span><span class="o">.</span><span class="n">plot_MOSY</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span><span class="mf">4.6</span><span class="p">),</span> <span class="n">ylim</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">2.5e-9</span><span class="p">,</span> <span class="mf">2.5e-9</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+<span class="gp">&gt;&gt;&gt; </span>                         <span class="n">levels</span><span class="o">=</span><span class="n">zoom</span><span class="o">*</span><span class="n">base</span><span class="o">**</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="n">number_of_lines</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Leading to the following figure:</p>
+<a class="reference internal image-reference" href="_images/mosy_scaled.png"><img alt="rescaled mosy spectrum" src="_images/mosy_scaled.png" style="width: 600px;" /></a>
+<p>In order to determine the position of the peaks, and therefore the mobility, it is recommended to plot slices in the mobility domain of the peaks on top of each other.
+For this reason, a list containing the chemical shifts of the peaks is necessary. This list can either be created manually, or by using the automatic peakpicker tool, or the GUI explained above.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">eNMRpy.Phasefitting</span> <span class="kn">import</span> <span class="n">peakpicker</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peakpicker</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ppm</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># list of peaks with [[ppm, intensity],..].</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">slices_ppm</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>              <span class="c1"># Only chemical shifts are returned from peaks via peaks[:,0]</span>
+</pre></div>
+</div>
+<p>The figure containing the MOSY slices is then created via the self.plot_slices_F1() method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mosyslicefig</span> <span class="o">=</span> <span class="n">mosy</span><span class="o">.</span><span class="n">plot_slices_F1</span><span class="p">(</span><span class="n">slices_ppm</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/mosyslicefig.png"><img alt="raw slices of mosy spectrum" src="_images/mosyslicefig.png" style="width: 600px;" /></a>
+<p>This figure shows the strong sync-modulation originating from a truncated FID and FFT in the mobility dimension. Rescaling the image, and autopicking and annotating the peaks with their respective mobility yields the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mosyslicefig</span> <span class="o">=</span> <span class="n">mosy</span><span class="o">.</span><span class="n">plot_slices_F1</span><span class="p">(</span><span class="n">peaks</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xlim</span> <span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">2.5e-9</span><span class="p">,</span> <span class="mf">2.5e-9</span><span class="p">)</span> <span class="p">,</span><span class="n">annotate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/mosyslicefig_annotated.png"><img alt="rescaled and annotated slices of mosy spectrum" src="_images/mosyslicefig_annotated.png" style="width: 600px;" /></a>
+<p><strong>Note:</strong> Even though the mobilities of all three peaks do not completely agree. this may be the case due to an insufficient digitization of the peak, which may be corrected by a higher zerofilling in self.calc_MOSY(), but also shows the limitations of MOSY analysis on substances exhibiting only a small phase shift range. It is however very helpful for complex spectra with large phase shift-ranges and a multitude of components with different mobilities, and also has the capability to resolve a superposition of two or more mobilities modulating a single NMR resonance.</p>
+</div>
+</div>
+<div class="section" id="calculating-the-mobility-from-phase-data">
+<h2>Calculating the mobility from phase data<a class="headerlink" href="#calculating-the-mobility-from-phase-data" title="Permalink to this headline">¶</a></h2>
+<p>In order to calculate the mobility, a linear regression has to be performed on the phase data in the eNMR measurement object, here <em>m</em>.
+For this reason, the method self.lin_huber() is used as a robust lin. regression method using the least squares approach with a threshold <em>epsilon</em>, looking for outliers.
+Here, it is reasonable to set the threshold to 3, in order to include all data points assuming a large scattering of the phase values. Data points which are excluded from the linear regression are depicted as red dots when using <em>self.lin_display()</em>.
+<em>y_column</em> sets the variable to be fitted and displayed. The phase variables from the fit model are named <em>ph0, ph1, ph2, […]</em>, while the phase variable originating from the autophase method is named <em>ph0acme</em>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">lin_huber</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">y_column</span><span class="o">=</span><span class="s1">&#39;ph0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">lin_display</span><span class="p">(</span><span class="n">y_column</span><span class="o">=</span><span class="s1">&#39;ph0&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/linearreg.png"><img alt="display of the linear regression" src="_images/linearreg.png" style="width: 400px;" /></a>
+<p>Consecutively, the mobility can be determined. Note that the electrode_distance is crucial for the calculation of the mobility. If not altered, the standard value of 2.2e-2 meters will be taken.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">mobility</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mobility</span><span class="p">(</span><span class="n">y_column</span><span class="o">=</span><span class="s1">&#39;ph0&#39;</span><span class="p">)</span>
+<span class="go">1.38E-09 (m^2/Vs) +- 6.45E-11</span>
+</pre></div>
+</div>
+<p>In order to display multiple fitted phases on top of each other use:
+.. code-block:: python</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">comparephasefig</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">lin_results_display</span><span class="p">([</span><span class="s1">&#39;ph0&#39;</span><span class="p">,</span> <span class="s1">&#39;ph0acme&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/phasecomparison.png"><img alt="comparison of fitted phase and autocorrected phase" src="_images/phasecomparison.png" style="width: 600px;" /></a>
 </div>
 <div class="section" id="analyzing-the-signal-intensity-after-phase-correction">
 <h2>Analyzing the signal intensity after phase correction<a class="headerlink" href="#analyzing-the-signal-intensity-after-phase-correction" title="Permalink to this headline">¶</a></h2>
+<p>In order to identify possible experimental artifacts, the evolution of the signal intensity can be investigated by correcting all spectra for their determined signal phase, making them fully absorptive, and consecutive integration.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">intensityfig</span><span class="p">,</span> <span class="n">integrationresults</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">analyze_intensity</span><span class="p">(</span><span class="n">ph_var</span><span class="o">=</span><span class="s1">&#39;ph0&#39;</span><span class="p">)</span>
+
+<span class="go">         U  intensity         ph</span>
+<span class="go"> 0     0.0   1.000000 -13.653589</span>
+<span class="go"> 1   -60.0   0.778901 -22.025162</span>
+<span class="go"> 2    60.0   0.758279   0.597989</span>
+<span class="go"> 3   -30.0   0.807881 -18.331584</span>
+<span class="go"> 4    30.0   0.948111  -6.251822</span>
+<span class="go"> 5   -50.0   0.748151 -21.568244</span>
+<span class="go"> 6    50.0   0.711298  -5.904790</span>
+<span class="go"> 7   -40.0   0.942212 -15.254777</span>
+<span class="go"> 8    40.0   0.823194  -6.118121</span>
+<span class="go"> 9  -100.0   0.595154 -30.651999</span>
+<span class="go"> 10  100.0   0.499146  12.829012</span>
+<span class="go"> 11  -20.0   0.940226 -14.515923</span>
+<span class="go"> 12   70.0   0.579074  -1.227382</span>
+<span class="go"> 13  -70.0   0.639213 -26.243095</span>
+<span class="go"> 14   20.0   0.881509 -11.049295</span>
+<span class="go"> 15  -80.0   0.657257 -26.869181</span>
+<span class="go"> 16   80.0   0.533540   1.642832</span>
+<span class="go"> 17  -10.0   0.965522 -13.948664</span>
+<span class="go"> 18   90.0   0.537945   8.729907</span>
+<span class="go"> 19  -90.0   0.585712 -29.861292</span>
+<span class="go"> 20   10.0   0.866894 -13.439502</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/intensityfig.png"><img alt="intensity figure" src="_images/intensityfig.png" style="width: 600px;" /></a>
 </div>
 <div class="section" id="saving-and-importing-measurements">
 <h2>Saving and importing measurements<a class="headerlink" href="#saving-and-importing-measurements" title="Permalink to this headline">¶</a></h2>
+<p>After evaluating an eNMR measurement, the spectral data and phase results can be stored in a .eNMRpy file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">save_eNMRpy</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In order to save only the self.eNMRraw table in excel format, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">eNMRraw</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Loading past results works this way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">eNMRpy</span> <span class="kn">import</span> <span class="n">tools</span>
+
+<span class="n">m_imported</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">Load_eNMRpy_data</span><span class="p">(</span><span class="s1">&#39;measurement_test.eNMRpy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The loaded results can be used in almost any way, as its original measurement object. This way of loading measurements is intended to archive several evaluation versions of the same or different measurements, and load them at some time in the future for comparison or plotting reasons.</p>
 <div class="toctree-wrapper compound">
 </div>
 </div>
