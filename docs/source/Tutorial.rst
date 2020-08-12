@@ -215,7 +215,7 @@ In order to see, whether the initial parameters are well-chosen resulting in a c
    :width: 400
    :alt: test fit of the fist spectrum
 
-In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object *m*, and the fit model *model*. Using this function, all eNMR spectra in *m* are fitted consecutively, and the results are stored in the m.eNMRraw pandas-DataFrame. **Note:** 
+In order to fit a whole eNMR measurement, the function Phasefitting.fit_Measurement() is used inserting the measurement object *m*, and the fit model *model*. Using this function, all eNMR spectra in *m* are fitted consecutively, and the results are stored in the *m.eNMRraw* pandas-DataFrame. 
 
 .. code-block:: python
 
@@ -334,7 +334,7 @@ This figure shows the strong sync-modulation originating from a truncated FID an
    :alt: rescaled and annotated slices of mosy spectrum
    
    
-**Note:** Even though the mobilities of all three peaks do not completely agree. this may be the case due to an insufficient digitization of the peak, which may be corrected by a higher zerofilling in self.calc_MOSY(), but also shows the limitations of MOSY analysis on substances exhibiting only a small phase shift range. It is however very helpful for complex spectra with large phase shift-ranges and a multitude of components with different mobilities, and also has the capability to resolve a superposition of two or more mobilities modulating a single NMR resonance.
+**Note:** Even though the mobilities of all three peaks do not completely agree, this may be the case due to an insufficient digitization of the peak, which may be corrected by a higher zerofilling in self.calc_MOSY(), but also shows the limitations of MOSY analysis on substances exhibiting only a small phase shift range. It is however very helpful for complex spectra with large phase shift-ranges and a multitude of components with different mobilities, and also has the capability to resolve a superposition of two or more mobilities modulating a single NMR resonance.
 
 
 
@@ -364,6 +364,7 @@ Consecutively, the mobility can be determined. Note that the electrode_distance 
    1.38E-09 (m^2/Vs) +- 6.45E-11
 
 In order to display multiple fitted phases on top of each other use:
+
 .. code-block:: python
 
    >>> comparephasefig = m.lin_results_display(['ph0', 'ph0acme'])
