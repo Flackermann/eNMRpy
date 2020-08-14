@@ -47,17 +47,20 @@ class Flo(_eNMR_Methods):
             
         self.pulseprogram = pulseprogram.read()
 
-        # regular expression for searching the bit lists and polarity list
-        regex = r"(define list.*bit.*|define list.*pol.*)"
+        bitregex = r"(define list.*bit.*|define list.*pol.*)"
+        vlistregex = r".*Voltage\sList.*=.*"
 
         # list, reading all lines with bit lists in the pulse program
-        rawlist = re.findall(regex, self.pulseprogram) 
+        rawlist = re.findall(bitregex, self.pulseprogram)
+        rawvlist = re.findall(vlistregex, self.pulseprogram) 
+
+        rawvlist = rawvlist[0].split('=')
+        vlist = eval(rawvlist[1])
 
         # array of integers generated from the rawlist. Indexing like [bit, voltagestep]
-        # this syntax is specific to the programming of the voltage in the pulse program
         bitarray = np.array([[int(i) for i in re.findall('{.*}', rawlist[j])[0][1:-1].split(' ')] for j in range(len(rawlist))])
 
-        # function to convert from a bitarray row to the respective integer with correct polarity
+
         def byte_to_int(bitarray, row):
             #converting the array into the correct string
             bitstring = str(bitarray[:,row])[1:-1].replace(' ', '')
@@ -71,9 +74,14 @@ class Flo(_eNMR_Methods):
             intvar = int(bitstring[:-1], 2)
             
             return polarity*intvar
-        
-        # creates the whole voltage list from the whole bitarray
+
+
         ulist = [byte_to_int(bitarray, i) for i in range(len(bitarray[0]))]
+        
+        if ulist == vlist:
+            pass
+        else:
+            raise ValueError('The decoded voltage list does not match the endcoding voltage list! Revisit your pulse program!')
         
         self.eNMRraw = pd.DataFrame(ulist, columns=['U / [V]'])
 
