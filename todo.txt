@@ -1,8 +1,10 @@
-- 
+- fehler der Steigung in self.linreg korrigieren --> stimmt nicht mit lin_huber überein
+
+- lin_huber instanzvariablen abschaffen
 
 - add the parameters from a fitmodel to the measurement object to be saved with save_eNMRpy()
 
-- replace Measurement.eNMR_Methods.lin_huber according Scikit-lean documentation to avoid deprecated code
+- replace Measurement.eNMR_Methods.lin_huber according Scikit-learn documentation to avoid deprecated code
 
 - Gewichtung der Peaks in Fit mit aufnehmen
 

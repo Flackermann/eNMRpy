@@ -4,6 +4,7 @@ import numpy as np
 import nmrglue as ng
 import matplotlib.pyplot as plt
 import pandas as pd
+import lmfit as lf
 
 class _eNMR_Methods(Measurement):
     """
@@ -388,6 +389,80 @@ class _eNMR_Methods(Measurement):
 
         return fig, intensity_data
 
+    def linreg(self, ulim=None, y_column='ph0'):
+        """
+        standard linear regression method based on the least-square method
+
+        ulim: 
+            tuple defining the voltage limits for the regression e.g. ulim = (-100, 100)
+        y_column:
+            column(keyword) to be analyzed from the eNMRraw dataset
+
+        stores results in lin_res_dic[y_column]
+        :returns: nothing
+        """
+
+        # select x-axis
+        #self._x_axis = {"U": "U / [V]",
+                #"G": "g in T/m"
+                #}[self.dependency.upper()]
+
+        # convert data
+        _eNMRreg = self.eNMRraw[[self._x_axis, y_column]].sort_values(self._x_axis)
+
+        # setting the axis for regression
+        if ulim is None:
+            umin = min(self.eNMRraw[self._x_axis])
+        else:
+            umin = ulim[0]
+
+        if ulim is None:
+            umax = max(self.eNMRraw[self._x_axis])
+        else:
+            umax = ulim[1]
+
+        _nparray = np.array(_eNMRreg[(self.eNMRraw[self._x_axis] <= umax)
+                                                == (self.eNMRraw[self._x_axis] >= umin)])
+        _X_train, _Y_train = _nparray[:, 0], _nparray[:, 1]
+
+
+        def lineareq(x, m, b):
+            return x*m+b
+        
+
+        # regression object
+        linmodel = lf.Model(lineareq)
+        linparams = linmodel.make_params()
+        linparams['b'].set(0)
+        linparams['m'].set(1)
+        result = linmodel.fit(_Y_train, x=_X_train, params=linparams)
+
+        # linear parameters
+        m = result.best_values['m']  # slope
+        b = result.best_values['b'] # y(0)
+        _Y_pred = result.best_fit
+    
+        # calculation of the slope deviation
+        _sig_m_a = np.sqrt(np.sum((_Y_train-_Y_pred)**2)/(np.size(_Y_train)-2))
+        _sig_m_b = np.sqrt(np.sum((_X_train-_X_train.mean())**2))
+        sig_m = _sig_m_a/_sig_m_b
+
+        # debug
+        #print(self.sig_m)
+
+        # R^2    
+        r_square = 1 - result.residual.var() / np.var(_Y_train)
+        
+        self.lin_res_dic[y_column] = {'b': b,
+                                'm': m,
+                                'sig_m': sig_m,
+                                'r_square': r_square,
+                                'x': np.array(_X_train.tolist()).ravel(),
+                                'y': np.array(_Y_train.tolist()).ravel(),
+                                'y_fitted': _Y_pred.ravel(),
+                                }
+        return
+
     # should be replaced by a more recent function since it will be deprecated
     def lin_huber(self, epsilon=3, ulim=None, y_column='ph0'):
         """
@@ -465,9 +540,10 @@ class _eNMR_Methods(Measurement):
         
         self.lin_res_dic[y_column] = {'b': self.b,
                                    'm': self.m,
-                                   'r^2': self.r_square,
+                                   'r_square': self.r_square,
                                    'x': np.array(self._X_train.tolist()).ravel(),
-                                   'y': self._y_pred.ravel(),
+                                   'y': self._Y_train,
+                                   'y_fitted': self._y_pred.ravel(),
                                    'sig_m': self.sig_m}
 
     def lin_display(self, ylim=None, show_slope_deviation=True, n_sigma_displayed=1, dpi=500, y_column='ph0', textpos=(0.5,0.15), extra_note=''):
@@ -498,7 +574,8 @@ class _eNMR_Methods(Measurement):
         #_x_axis = {"U":"U / [V]", "G":"g in T/m"}
         #self._x_axis = {"U":"U / [V]", "G":"g in T/m"}[self.dependency]
 
-        print("formula: y = {0}x + {1}".format(self.m,self.b))
+        print("formula: y = {0}x + {1}".format(self.lin_res_dic[y_column]['m']
+                                                ,self.lin_res_dic[y_column]['b']))
         
         # create figure
         fig_enmr = plt.figure()
@@ -507,24 +584,35 @@ class _eNMR_Methods(Measurement):
         _ax = fig_enmr.add_subplot(111)
         
         # color format for outliers
-        colors = ["r" if n else "k" for n in self.eNMRraw.sort_values(self._x_axis)['outlier']]
+        try:
+            colors = ["r" if n else "k" for n in self.eNMRraw.sort_values(self._x_axis)['outlier']]
+        except KeyError:
+            colors = ["k" for n in self.eNMRraw[y_column]]
+            print('no outliers registered')
+            pass
         
-        _ax.scatter(x=np.ravel(self._eNMRreg[self._x_axis]),
-                    y=np.ravel(self._eNMRreg[y_column]),
+        #_ax.scatter(x=np.ravel(self._eNMRreg[self._x_axis]),
+                    #y=np.ravel(self._eNMRreg[y_column]),
+        _ax.scatter(x=np.ravel(self.eNMRraw[self._x_axis]),
+                    y=np.ravel(self.eNMRraw[y_column]),
                     marker="o",
                     c=colors)
         _ax.set_ylim(ylim)
 
         # format the data for plotting
-        _xdata = np.ravel(self._X_train)
-        _ydata = np.ravel(self._y_pred)
+        _xdata = np.ravel(self.lin_res_dic[y_column]['x'])
+        _ydata = np.ravel(self.lin_res_dic[y_column]['y_fitted'])
         
         # Plot the regression
         _ax.plot(_xdata, _ydata, "r-")
 
         if show_slope_deviation:
-            _ax.fill_between(_xdata, _xdata*(self.m+n_sigma_displayed*self.sig_m)+self.b,
-                                     _xdata*(self.m-n_sigma_displayed*self.sig_m)+self.b,
+            #_ax.fill_between(_xdata, _xdata*(self.m+n_sigma_displayed*self.sig_m)+self.b,
+                                     #_xdata*(self.m-n_sigma_displayed*self.sig_m)+self.b,
+                                     #alpha=0.5,
+                                     #facecolor="blue")
+            _ax.fill_between(_xdata, _xdata*(self.lin_res_dic[y_column]['m']+n_sigma_displayed*self.lin_res_dic[y_column]['sig_m'])+self.lin_res_dic[y_column]['b'],
+                                     _xdata*(self.lin_res_dic[y_column]['m']-n_sigma_displayed*self.lin_res_dic[y_column]['sig_m'])+self.lin_res_dic[y_column]['b'],
                                      alpha=0.5,
                                      facecolor="blue")
 
@@ -551,10 +639,10 @@ class _eNMR_Methods(Measurement):
         
         # plotting the Textbox
         plt.text(textx, texty,
-                 "y = %.4f $\cdot$ x + %4.2f\n$R^2$=%4.3f; $\sigma_m=$%4.4f"%(self.m,
-                                                                              self.b,
-                                                                              self.r_square,
-                                                                              self.sig_m),
+                 "y = %.4f $\cdot$ x + %4.2f\n$R^2$=%4.3f; $\sigma_m=$%4.4f"%(self.lin_res_dic[y_column]['m'],
+                                                                              self.lin_res_dic[y_column]['b'],
+                                                                              self.lin_res_dic[y_column]['r_square'],
+                                                                              self.lin_res_dic[y_column]['sig_m']),
                  fontsize=14,
                  bbox={'facecolor':'white', 'alpha':0.7,'pad':10},
                  horizontalalignment='center',
@@ -732,6 +820,9 @@ class _eNMR_Methods(Measurement):
         """
         saves the mobility result data in the measurement-folder similar to obj.output_data()
         """
+        from warnings import warn
+        warn('this function was renamed output_properties_csv')
+        
         results_output = pd.Series([self.nuc,
                                     self.mu[0],
                                     self.sig_m*self.mu[0],
@@ -755,11 +846,18 @@ class _eNMR_Methods(Measurement):
             results_output.to_csv(path+"mobility_data_"+self.expno+".csv")
         else:
             print('ooops!')
+            
+    def output_properties_csv(self, path=None):
+        """
+        saves the mobility result data in the measurement-folder similar to obj.output_phase_data()
+        """
+        self.output_results(self, path)
     
     def output_all_results(self, path=None, data=False):
         """
         saves the mobility result data in the measurement-folder similar to obj.output_data()
         """
+        
         from pandas import ExcelWriter
         from openpyxl import load_workbook
         
@@ -808,11 +906,12 @@ class _eNMR_Methods(Measurement):
         """
         calculates and returns (mobility, deviation) from the regression data
         """
-                #self.lin_res_dic = {y_column: {'b': self.b,
-                                   #'m': self.m,
-                                   #'r^2': self.r_square,
-                                   #'y_reg': self._y_pred,
-                                   #'sig_m': self.sig_m}}
+        
+        #self.lin_res_dic = {y_column: {'b': self.b,
+                            #'m': self.m,
+                            #'r^2': self.r_square,
+                            #'y_reg': self._y_pred,
+                            #'sig_m': self.sig_m}}
         if electrode_distance is None:
             d = self.d
         else:
@@ -836,14 +935,14 @@ class _eNMR_Methods(Measurement):
         else:
             m = self.lin_res_dic[y_column]['m']
             sig_m = self.lin_res_dic[y_column]['sig_m']
-            self.mu = (m*d)/(self.gamma*self.delta*self.Delta*g)
-            self.lin_res_dic[y_column]['mu']=self.mu
-            self.lin_res_dic[y_column]['mu_err']=self.mu*(sig_m/m)
+            mu = (m*d)/(self.gamma*self.delta*self.Delta*g)
+            self.lin_res_dic[y_column]['mu']= mu
+            self.lin_res_dic[y_column]['mu_err']= mu*(sig_m/m)
             #return self.mu, self.mu*(sig_m/m)
-            self.sig_m, self.m = sig_m, m
+            #self.sig_m, self.m = sig_m, m
         
         if verbose:
-            print ('%.2E (m^2/Vs)'%self.mu[0],'+- %.2E'%(self.mu*(self.sig_m/self.m)))
+            print ('%.2E (m^2/Vs)'%self.lin_res_dic[y_column]['mu'],'+- %.2E'%(self.lin_res_dic[y_column]['mu']*(self.lin_res_dic[y_column]['sig_m']/self.lin_res_dic[y_column]['m'])))
         
-        return self.mu[0], self.mu[0]*(self.sig_m/self.m[0])
+        return self.lin_res_dic[y_column]['mu'], self.lin_res_dic[y_column]['mu']*(self.lin_res_dic[y_column]['sig_m']/self.lin_res_dic[y_column]['m'])
 

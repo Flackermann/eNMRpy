@@ -1,5 +1,11 @@
 Version 0.0.3
 -------------
+- linreg()-method added as a lmfit-based linear regression preventing deprecation of huber regressor. However, linreg() does not work with a threshold.
+
+- going back lin_res_dic dictionary in order to avoid cluttering of the instance variables --> linreg and mobility methods changed.
+
+- output_results got a more precise name: output_properties_csv
+
 - mobility()-method now returns a tuple of values (mobility, error), instead of a tuple of numpy arrays (np.array(mobility), np.array(error))
 
 - MOSY-class was fixed to be compatible with newer pandas versions
