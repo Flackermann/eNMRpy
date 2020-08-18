@@ -486,65 +486,65 @@ class _eNMR_Methods(Measurement):
                    #}[self.dependency.upper()]
 
         # convert data
-        self._eNMRreg = self.eNMRraw[[self._x_axis, y_column]].sort_values(self._x_axis)
+        _eNMRreg = self.eNMRraw[[self._x_axis, y_column]].sort_values(self._x_axis)
         
         # setting the axis for regression
         if ulim is None:
-            self.umin = min(self.eNMRraw[self._x_axis])
+            umin = min(self.eNMRraw[self._x_axis])
         else:
-            self.umin = ulim[0]
+            umin = ulim[0]
             
         if ulim is None:
-            self.umax = max(self.eNMRraw[self._x_axis])
+            umax = max(self.eNMRraw[self._x_axis])
         else:
-            self.umax = ulim[1]
+            umax = ulim[1]
 
-        self._npMatrix = np.matrix(self._eNMRreg[(self.eNMRraw[self._x_axis] <= self.umax)
-                                                 == (self.eNMRraw[self._x_axis] >= self.umin)])
+        _npMatrix = np.matrix(_eNMRreg[(self.eNMRraw[self._x_axis] <= umax)
+                                                 == (self.eNMRraw[self._x_axis] >= umin)])
 
-        self._X_train, self._Y_train = self._npMatrix[:, 0], self._npMatrix[:, 1]
+        _X_train, _Y_train = _npMatrix[:, 0], _npMatrix[:, 1]
         
         # regression object
-        self.huber = hub.HuberRegressor(epsilon=epsilon)
-        self.huber.fit(self._X_train, self._Y_train)
+        huber = hub.HuberRegressor(epsilon=epsilon)
+        huber.fit(_X_train, _Y_train)
         
         # linear parameters
-        self.m = self.huber.coef_  # slope
-        self.b = self.huber.intercept_  # y(0)
-        self._y_pred = self.huber.predict(self._X_train)
-        self._y_pred = self._y_pred.reshape(np.size(self._X_train), 1)
+        m = huber.coef_  # slope
+        b = huber.intercept_  # y(0)
+        _y_pred = huber.predict(_X_train)
+        _y_pred = _y_pred.reshape(np.size(_X_train), 1)
         
         # drop the outliers
-        self._outX_train = np.array(self._X_train[[n == False for n in self.huber.outliers_]])
-        self._outY_train = np.array(self._Y_train[[n == False for n in self.huber.outliers_]])
-        self._outY_pred = np.array(self._y_pred[[n == False for n in self.huber.outliers_]])
+        _outX_train = np.array(_X_train[[n == False for n in huber.outliers_]])
+        _outY_train = np.array(_Y_train[[n == False for n in huber.outliers_]])
+        _outY_pred = np.array(_y_pred[[n == False for n in huber.outliers_]])
         
         # mark outliers in dataset
         # self._inliers = [n is not True for n in self.huber.outliers_]
 
         self.eNMRraw["outlier"] = True
 
-        for n in range(len(self._npMatrix[:, 0])):
-            self.eNMRraw.loc[self.eNMRraw[self._x_axis] == self._npMatrix[n, 0], "outlier"] = self.huber.outliers_[n]
+        for n in range(len(_npMatrix[:, 0])):
+            self.eNMRraw.loc[self.eNMRraw[self._x_axis] == _npMatrix[n, 0], "outlier"] = huber.outliers_[n]
 
         # calculation of the slope deviation
-        _sig_m_a = np.sqrt(np.sum((self._outY_train-self._outY_pred)**2)/(np.size(self._outY_train)-2))
-        _sig_m_b = np.sqrt(np.sum((self._outX_train-self._outX_train.mean())**2))
-        self.sig_m = _sig_m_a/_sig_m_b
+        _sig_m_a = np.sqrt(np.sum((_outY_train-_outY_pred)**2)/(np.size(_outY_train)-2))
+        _sig_m_b = np.sqrt(np.sum((_outX_train-_outX_train.mean())**2))
+        sig_m = _sig_m_a/_sig_m_b
 
         # debug
         #print(self.sig_m)
 
         # R^2
-        self.r_square = self.huber.score(self._outX_train, self._outY_train)
+        r_square = huber.score(_outX_train, _outY_train)
         
-        self.lin_res_dic[y_column] = {'b': self.b,
-                                   'm': self.m,
-                                   'r_square': self.r_square,
-                                   'x': np.array(self._X_train.tolist()).ravel(),
-                                   'y': self._Y_train,
-                                   'y_fitted': self._y_pred.ravel(),
-                                   'sig_m': self.sig_m}
+        self.lin_res_dic[y_column] = {'b': b,
+                                   'm': m,
+                                   'r_square': r_square,
+                                   'x': np.array(_X_train.tolist()).ravel(),
+                                   'y': _Y_train,
+                                   'y_fitted': _y_pred.ravel(),
+                                   'sig_m': sig_m}
 
     def lin_display(self, ylim=None, show_slope_deviation=True, n_sigma_displayed=1, dpi=500, y_column='ph0', textpos=(0.5,0.15), extra_note=''):
         """
