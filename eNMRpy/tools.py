@@ -9,7 +9,9 @@ class Load_eNMRpy_data(_eNMR_Methods):
     
     returns: eNMR-Measurement-object which can be used as usual.
     '''
-    def __init__(self, path):
+    def __init__(self, path, load_spectral_data=True):
+        
+        self.load_spectral_data=load_spectral_data
         
         if path.split('.')[-1] != 'eNMRpy':
             raise NameError('the given path does not correspond to a .eNMRpy file!')
@@ -17,22 +19,41 @@ class Load_eNMRpy_data(_eNMR_Methods):
         
         f = open(path)
         
-        dic = eval(f.read().replace('array',''))
+        dic = eval(f.read().replace('array','').replace('matrix', ''))
             
         for k in dic:
             if '_type_pd.DataFrame' in k:
                 setattr(self, k.replace('_type_pd.DataFrame',''), pd.read_json(dic[k]))
+            elif ((k=='data') or (k=='ppm')) and (load_spectral_data != True):
+                pass
             else:
                 setattr(self, k, dic[k])
         
-        self.data = np.loadtxt(StringIO(self.data), dtype=complex)
-        self.ppm = np.loadtxt(StringIO(self.ppm), dtype=float)
-        
-        # derived instance variables
-        self.data_orig = self.data
-        self._ppmscale = np.linspace(self._ppm_l, self._ppm_r, self.n_zf_F2)  # np.size(self.data[0,:]))
-        #self.ppm = self._ppmscale
-        self.fid = self.data
+        if load_spectral_data:
+            self.data = np.loadtxt(StringIO(self.data), dtype=complex)
+            self.ppm = np.loadtxt(StringIO(self.ppm), dtype=float)
+            
+            # derived instance variables
+            self.data_orig = self.data
+            self._ppmscale = np.linspace(self._ppm_l, self._ppm_r, self.n_zf_F2)  # np.size(self.data[0,:]))
+            #self.ppm = self._ppmscale
+            self.fid = self.data
+            
+    def __repr__(self):
+        if self.load_spectral_data:
+            return '''%s, expno %s, Delta = %.1fms, ppm range: %.1f to %.1f
+        delta= %.1fms, g= %.3f T/m, e-distance=%.0fmm'''%(
+            self.nuc, self.expno, self.Delta*1000, 
+            self.ppm[0], self.ppm[-1],
+            self.delta*1000, self.g, self.d*1000
+            )
+        else:
+            return '''spectral data not loaded!
+        %s, expno %s, Delta = %.1fms, 
+        delta= %.1fms, g= %.3f T/m, e-distance=%.0fmm'''%(
+            self.nuc, self.expno, self.Delta*1000, 
+            self.delta*1000, self.g, self.d*1000
+            )
     
     def plot_fid(self):
         raise ValueError('this method is not available in loaded .eNMRpy file! Sorry! please consider the original data')

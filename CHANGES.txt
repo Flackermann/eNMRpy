@@ -1,5 +1,7 @@
 Version 0.0.3
 -------------
+- Option added in tools.Load_eNMRpy_data to not import spectral data and therefore improve performance
+
 - linreg()-method added as a lmfit-based linear regression preventing deprecation of huber regressor. However, linreg() does not work with a threshold.
 
 - going back lin_res_dic dictionary in order to avoid cluttering of the instance variables --> linreg and mobility methods changed.
