@@ -13,7 +13,8 @@ class MOSY(object):
         self.eNMRraw['data'] = None
         self.eNMRraw['fid'] = None
         for row in range(len(obj.data[:,0])):
-            self.eNMRraw.set_value(row, 'data', pd.Series(obj.data[row,:]))
+            self.eNMRraw.at[row, 'data'] = pd.Series(obj.data[row,:]) # new syntax
+            #self.eNMRraw.set_value(row, 'data', pd.Series(obj.data[row,:])) # old syntax
             #self.eNMRraw.set_value(row, 'fid', pd.Series(obj.fid[row,:]))
         data_sorted = np.array(obj.eNMRraw['data'].tolist())
         self.data = data_sorted.astype('complex').copy()
@@ -76,11 +77,11 @@ class MOSY(object):
         along the F1 dimension
         """
         
-        from nmrglue.proc_base import fft
+        from nmrglue import proc_base
         
         #data_temp = np.zeros(self.data.shape)
         for n in range(len(self.data[0,:])):
-            self.data[:,n] = fft(self.data[:,n])
+            self.data[:,n] = proc_base.fft(self.data[:,n])
         print("done")
     
     def calc_MOSY(self, u_max = None, n_zf=2**12, mobility_scale=True, include_0V=True, electrode_distance=2.2e-2, old_zf=False):
@@ -126,8 +127,8 @@ class MOSY(object):
         SHR_imag = np.zeros((len(positive['data']), len(positive['data'].iloc[0])))
 
         for n in range(1, len(positive['data'])):
-            SHR_real[n,:] = positive['data'].iloc[n].real + negative['data'].iloc[n].real
-            SHR_imag[n,:] = positive['data'].iloc[n].imag - negative['data'].iloc[n].imag
+            SHR_real[n,:] = positive['data'].iloc[n].values.real + negative['data'].iloc[n].values.real
+            SHR_imag[n,:] = positive['data'].iloc[n].values.imag - negative['data'].iloc[n].values.imag
 
         SHR = SHR_real + SHR_imag*1j
         del(SHR_real)

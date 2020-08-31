@@ -22,7 +22,7 @@ class Pavel(_eNMR_Methods):
     d:
         electrode_distance
     '''
-    def __init__(self, path, expno, dependency='U', alias=None, lineb=5, d=2.2e-2, cell_resistance=None):
+    def __init__(self, path, expno, dependency='U', alias=None, lineb=.3, d=2.2e-2, cell_resistance=None):
         
         self.dependency = dependency
         self.cell_resistance = cell_resistance
@@ -40,10 +40,13 @@ class Pavel(_eNMR_Methods):
         try:
             self.vdList = pd.read_csv(self.dateipfad+"/vdlist",
                                       names=["vd"]).loc[:len(self.data[:, 0])-1]
+        except IndexError:
+            raise IndexError('Your data is %i-dimensional instead of 2-dimensional. This may be an issue with Topspin. Most likely your measurement was aborted.'%self.data.ndim)
         except:
-            print('no vdList found, generated ones list instead')
-            self.vdList = pd.DataFrame(np.ones((len(self.data[:, 0]), 1)),
-                                       columns=["vd"])
+            raise FileNotFoundError('no VD-List found!')
+            #print('no vdList found, generated ones list instead')
+            #self.vdList = pd.DataFrame(np.ones((len(self.data[:, 0]), 1)),
+                                       #columns=["vd"])
         self.eNMRraw = self.vdList
 
         #self.vdList["U / [V]"] = hier die Konversion von vdlist zu Spannungsliste

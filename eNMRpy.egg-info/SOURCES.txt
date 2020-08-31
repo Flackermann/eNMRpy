@@ -11,6 +11,7 @@ eNMRpy.egg-info/dependency_links.txt
 eNMRpy.egg-info/requires.txt
 eNMRpy.egg-info/top_level.txt
 eNMRpy/Measurement/Emma.py
+eNMRpy/Measurement/Flo.py
 eNMRpy/Measurement/Juergen1.py
 eNMRpy/Measurement/Pavel.py
 eNMRpy/Measurement/Simulated.py

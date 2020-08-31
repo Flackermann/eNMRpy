@@ -39,13 +39,17 @@ def set_peaks(m, n=-1, timeout=-1, xlim=None, **plot_kwargs): #,xlim=(0,10)
     return arr
 
 
-def peakpicker(x, y=None, width=10, threshold=1e5):
+def peakpicker(x, y=None, inverse_order=False, width=10, threshold=1e5):
     """
     tool to automatically determine peak positions in an x-y spectrum
     
     x: ppm/frequency-array
         x [optional]: Measurement-object of which the first slice is taken
     y: intensity
+    
+    inverse_order:
+        inverts the order of peaks in the array
+        this could be helpful when passing it to make_model
     
     width: scan width. should be even numbered
     
@@ -105,7 +109,11 @@ def peakpicker(x, y=None, width=10, threshold=1e5):
             # i-width//2 ensures that the right coordinates are given for the respective peak
             peaks.append((x[i-width//2], y[i-width//2].real))
     
-    return np.array(peaks)
+    if inverse_order:
+        return np.array(peaks)[::-1]
+    
+    elif not inverse_order:
+        return np.array(peaks)
 
 
 def make_model(peaks, print_params=True):
@@ -137,50 +145,55 @@ def reduce_fitted_phases(Measurementobject, SpecModel):
         m.eNMRraw[k+'reduced'] = m.eNMRraw[k]*m.d/m.delta/m.Delta/m.g/m.gamma
         m.eNMRraw[k+'reduced'] -= m.eNMRraw.loc[m.eNMRraw['U / [V]']==0, k+'reduced'][0]
 
-def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath=None, fixed_parameters=None):
+def fit_Measurement(obj_M, obj_S, fixed_parameters=None, plot=False, savepath=None, **plot_kwargs):
     '''
     function to fit a the series of voltage dependent spectra contained in a typical eNMR measurement
     
     obj_M: object of the class eNMR_Measurement
     obj_S: object of the class SpecModel
     fixed_parameters: List of parameters to be fixed after the first fit
+    
+    **plot_kwargs are passed to SpecModel.fit:
+        peak_deconvolution=False, parse_complex='abs','real, or 'imag'
+    
     '''
     
-    fp = []
-    
-    
-    if fixed_parameters is None:
-        i = 0
+    i=0
+
+    if fixed_parameters is not None:
+        fp = [] # working list of parameter-objects
         
-    elif fixed_parameters is not None:
-        #finds the matching parameter keys
-        if len(fixed_parameters[0]) == 2:
-            fp = fixed_parameters
-        else:
-            for i in range(len(fixed_parameters)):
-                for p in obj_S.params:
-                    if p[0] == fixed_parameters[i]:
-                        fp.append(p)
-                    
-        i = 1 #counter set to one for the rest of the spectra to be fitted
-        fig = obj_S.fit(obj_M.ppm, obj_M.data[0], plot=plot, peak_deconvolution=peak_deconvolution)
+        # iterates the list of parameters
+        for k in obj_S.params.keys(): 
+            # if the parameter name p[0] matches any string in fixed_parameters
+            if any(k == np.array(fixed_parameters)): 
+                # append the parameter to the working list
+                fp.append(k)                
+        
+        
+        fig = obj_S.fit(obj_M.ppm, obj_M.data[0], **plot_kwargs)
+        print('row 0 fitted including fixed_parameters being varied')
         ph_res = obj_S.get_result_values()
         
         for par in ph_res.keys():
-            #obj_M.eNMRraw.set_value(row, par, ph_res[par])
+            # saves the results from row 0 in the eNMRraw-DataFrame
             obj_M.eNMRraw.at[0, par] = ph_res[par]
-            
+        
+        
         for p in fp: # fixes all variables listed in fixed_parameters
+            obj_S.params[p].set(obj_S.result.params[p].value)
             obj_S.params[p].set(vary=False)
             print('%s not varied!'%p)
             
         if (plot is True) and (savepath is not None):
             fig.savefig(savepath+'%.1f'%obj_M.eNMRraw.loc[0, obj_M._x_axis]+'.png', dpi=300)
-    
-    print('start fitting')
+        
+        i = 1 #counter set to one for the rest of the spectra to be fitted
+
+    print('start fitting from row %i'%i)
     
     for row in range(i, obj_M.data[:,0].size):
-        fig = obj_S.fit(obj_M.ppm, obj_M.data[row], plot=plot, peak_deconvolution=peak_deconvolution)
+        fig = obj_S.fit(obj_M.ppm, obj_M.data[row], plot=plot, **plot_kwargs)
         ph_res = obj_S.get_result_values()
         
         for par in ph_res.keys():
@@ -190,8 +203,8 @@ def fit_Measurement(obj_M, obj_S, plot=False, peak_deconvolution=False, savepath
         if (plot is True) and (savepath is not None):
             fig.savefig(savepath+'%.1f'%obj_M.eNMRraw.loc[row, obj_M._x_axis]+'.png', dpi=300)
             
-    for p in fp: # reset all vary-Values
-        obj_S.params[p].set(vary=True)
+    #for p in fp: # reset all vary-Values
+        #obj_S.params[p].set(vary=True)
     
     
     print('fitting finished')
@@ -494,12 +507,15 @@ class SpecModel(object):
             
         return fig
     
-    def fit(self, xdata, ydata, plot=False, peak_deconvolution=False):
+    def fit(self, xdata, ydata, plot=False, peak_deconvolution=False, parse_complex='real', figsize=None):
         """
         method to fit a single spectrum consisting of xdata and ydata
         with the previously defined model and parameters
         
         stores the result in self.result
+        
+        parse_complex: representation of the complex data when plotting
+            "real", "imag", or "abs"
         
         returns a matplotlib figure if plot=True
         """
@@ -509,8 +525,11 @@ class SpecModel(object):
         
         fig = None
         if plot:
-            fig = self.result.plot()[0]
-        
+            fig = self.result.plot(parse_complex=parse_complex)[0]
+            if figsize != None:
+                fig = plt.gcf()
+                fig.set_size_inches(figsize)
+            
         if peak_deconvolution and plot:
             ax = fig.gca()
             for n in range(self.n):
