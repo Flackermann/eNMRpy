@@ -1,3 +1,8 @@
+Version 0.0.4
+-------------
+
+-bugfix: lin_results_display() now shows the regression correctly again.
+
 Version 0.0.3
 -------------
 - Option added in tools.Load_eNMRpy_data to not import spectral data and therefore improve performance
