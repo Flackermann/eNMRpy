@@ -710,7 +710,7 @@ class _eNMR_Methods(Measurement):
                 except ValueError:
                     ax.errorbar(self.eNMRraw[self._x_axis], self.eNMRraw[col]-corr, fmt='o', label=message[col], c=colors[i], marker=markers[i])
                 if regression:
-                    ax.plot(self.lin_res_dic[col]['x'], self.lin_res_dic[col]['y']-corr, '--', label='%s lin regression'%col, c=colors[i], marker=None)
+                    ax.plot(self.lin_res_dic[col]['x'], self.lin_res_dic[col]['y_fitted']-corr, '--', label='%s lin regression'%col, c=colors[i], marker=None)
 
         else:
             if normalize:
@@ -730,7 +730,7 @@ class _eNMR_Methods(Measurement):
             except ValueError:
                 ax.errorbar(self.eNMRraw[self._x_axis], self.eNMRraw[cols]-corr, fmt='o', label=message[cols], c=colors[0], marker=markers)
                 if regression:
-                    ax.plot(self.lin_res_dic[cols]['x'], self.lin_res_dic[cols]['y']-corr, '--', label='%s lin regression'%cols, c=colors[0], marker=None)
+                    ax.plot(self.lin_res_dic[cols]['x'], self.lin_res_dic[cols]['y_fitted']-corr, '--', label='%s lin regression'%cols, c=colors[0], marker=None)
 
         ax.legend(bbox_to_anchor=(x_legend, y_legend), ncol=ncol_legend)
         

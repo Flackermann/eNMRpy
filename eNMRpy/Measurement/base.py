@@ -28,7 +28,9 @@ class Measurement(object):
         self.alias = alias
         self.name = self.dateipfad.split(sep='/')[-2]+'/'+self.expno
         self.lineb = lineb
-                
+        
+        self.comment_string = None
+        
         # takes the title page to extract the volt increment
         try:
             title = open(self.dateipfad+"/pdata/1/title").read()
@@ -81,6 +83,16 @@ class Measurement(object):
         #self.dependency = None
 
         # END __INIT__
+        
+    def comment(self, s, append_to_title=False):
+        '''
+        write a comment as a multi-line-string or normal string
+        '''
+        self.comment_string = s
+        
+        if append_to_title:
+            #self._title_page_orig = self.title_page
+            self.title_page += self.comment_string
 
     def calibrate_ppm(self, ppmshift):
         """
