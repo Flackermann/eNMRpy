@@ -83,7 +83,19 @@ class Measurement(object):
         #self.dependency = None
 
         # END __INIT__
+    
+    def ph_ref(self, ref):
+        '''
+        reference your phase shifts on the shifts of one peak.
+        ref: string, name of the peak which phase is used for reference (usually solvent).
+        '''
+        ref_orig_ph = self.eNMRraw[ref]
         
+        for i in range (int((self.eNMRraw.shape[1] - 7)/8)):
+            phase_name = 'ph' + str(i)
+            self.eNMRraw[phase_name] = self.eNMRraw[phase_name] - ref_orig_ph
+    
+    
     def comment(self, s, append_to_title=False):
         '''
         write a comment as a multi-line-string or normal string
