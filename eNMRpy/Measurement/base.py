@@ -91,7 +91,7 @@ class Measurement(object):
         '''
         ref_orig_ph = self.eNMRraw[ref]
         
-        for i in range (int((self.eNMRraw.shape[1] - 7)/8)):
+        for i in filter(lambda x: x[:2] =='ph', m.eNMRraw.keys()):
             phase_name = 'ph' + str(i)
             self.eNMRraw[phase_name] = self.eNMRraw[phase_name] - ref_orig_ph
     
