@@ -92,8 +92,7 @@ class Measurement(object):
         ref_orig_ph = self.eNMRraw[ref]
         
         for i in filter(lambda x: x[:2] =='ph', self.eNMRraw.keys()):
-            phase_name = 'ph' + str(i)
-            self.eNMRraw[phase_name] = self.eNMRraw[phase_name] - ref_orig_ph
+            self.eNMRraw[i] = self.eNMRraw[i] - ref_orig_ph
     
     
     def comment(self, s, append_to_title=False):
