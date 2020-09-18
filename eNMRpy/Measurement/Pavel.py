@@ -111,6 +111,18 @@ class Pavel(_eNMR_Methods):
                 self.uInk *= -1
             # calculation of the Voltage from cell resistance and Current /1000 because of mA
             self.eNMRraw[self._x_axis] *= self.cell_resistance/1000
+        
+        elif self.dependency.upper() == "G":
+            self.uInk = None
+            self.eNMRraw[self._x_axis] = [
+                    0 if (self.eNMRraw.loc[i,'vd_temp'] <= 0.6)
+                    else 
+                    n if i%2==0 
+                    else 
+                    n*-1
+                    for i, n in enumerate(self.eNMRraw['vd_temp'])
+                ]
+            self.uInk = self.eNMRraw['U / [V]'][0]
             
     def plot_spec(self, row, xlim=None, figsize=None, invert_xaxis=True, sharey=True):#, ppm=True):
         from .Juergen1 import Juergen1 as eNMR_Measurement
