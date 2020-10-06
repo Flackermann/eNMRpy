@@ -89,9 +89,9 @@ class Measurement(object):
         reference your phase shifts on the shifts of one peak.
         ref: string, name of the peak which phase is used for reference (usually solvent).
         '''
-        ref_orig_ph = self.eNMRraw[ref]
+        ref_orig_ph = self.eNMRraw[ref].copy
         
-        for i in filter(lambda x: x[:2] =='ph', self.eNMRraw.keys()):
+        for i in filter(lambda x: x[:2] =='ph' and x[-1]!='r', self.eNMRraw.keys()):
             self.eNMRraw[i] = self.eNMRraw[i] - ref_orig_ph
     
     
