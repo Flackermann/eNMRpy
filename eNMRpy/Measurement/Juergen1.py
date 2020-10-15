@@ -1,5 +1,9 @@
 from .eNMR_Methods import _eNMR_Methods
 import matplotlib.pyplot as plt
+from .base import Measurement
+from re import findall
+import pandas as pd
+
 
 class Juergen1(_eNMR_Methods):
     '''
@@ -23,7 +27,7 @@ class Juergen1(_eNMR_Methods):
         setting a standard-value for the linebroadening.
     '''
     def __init__(self, path, expno, Uink=None, dependency="U", alias=None, linebroadening=0.5, electrode_distance=2.2e-2):
-        Measurement.__init__(self, path, expno, linebroadening=linebroadening, alias=alias)
+        Measurement.__init__(self, path, expno, lineb=linebroadening, alias=alias)
         self.dependency = dependency.upper()
         
         self._x_axis = {"U": "U / [V]",
