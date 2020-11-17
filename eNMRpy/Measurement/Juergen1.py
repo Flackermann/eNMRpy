@@ -116,26 +116,24 @@ class Juergen1(_eNMR_Methods):
             self.delta = float(root.findall('delta')[0].text)*1e-3  # it should be read as in microseconds at this point due to bruker syntax
             print('The diffusion parameters were read from the respectie .XML!')
         except:
-            # determination of the diffusion parameters for Emma
-            self._d2 = self.dic["acqus"]["D"][2]
-            self._d5 = self.dic["acqus"]["D"][5]
-            self._d9 = self.dic["acqus"]["D"][9]
-            self._d11 = self.dic["acqus"]["D"][11]
-            self._p19, self._p18, self._p17 = self.dic["acqus"]["P"][19],\
-                                            self.dic["acqus"]["P"][18],\
-                                            self.dic["acqus"]["P"][17]
-            print('That did not work. Your data is from an old spectrometer!')
+            # determination of the diffusion parameters for the Spectrometer "Emma"
+            _d2 = self.dic["acqus"]["D"][2]
+            _d5 = self.dic["acqus"]["D"][5]
+            _d9 = self.dic["acqus"]["D"][9]
+            _d11 = self.dic["acqus"]["D"][11]
+            _p19, _p18, _p17 = self.dic["acqus"]["P"][19], self.dic["acqus"]["P"][18], self.dic["acqus"]["P"][17]
+            print('Your data is from an old spectrometer!')
             # calculating usable parameters
-            self.delta = self._p17+self._p18
-            self._Delta_1 = 0.001*(self._p17*2+self._p18)+(self._d2+self._d9+self._d5+self._d11)*1000+0.001*self.p1+self._d11
-            self._Delta_2 = 0.001*(self._p17*2+self._p18)+(self._d2+self._d9+self._d5+self._d11)*1000+0.001*self.p1*2
-            self._spoiler = (self._d11+self._p17+self._p19+self._p17)*0.001+self._d2*1000
-            self.Delta = self._Delta_1+self._Delta_2+2*self._spoiler
-            self.Delta *=1e-3
-            self.delta *=1e-6
+            self.delta = _p17+_p18
+            _Delta_1 = 0.001*(_p17*2+_p18)+(_d2+_d9+_d5+_d11)*1000+0.001*self.p1+_d11
+            _Delta_2 = 0.001*(_p17*2+_p18)+(_d2+_d9+_d5+_d11)*1000+0.001*self.p1*2
+            _spoiler = (_d11+_p17+_p19+_p17)*0.001+_d2*1000
+            self.Delta = _Delta_1+_Delta_2+2*_spoiler
+            self.Delta *=1e-3 # unit conversion
+            self.delta *=1e-6 # final unit conversion
             
 
-        # Elektrodenabstand in m
+        # electrode distance in m
         self.d = electrode_distance
         self.g = self.eNMRraw["g in T/m"][0]
     

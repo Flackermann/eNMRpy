@@ -366,11 +366,7 @@ class Measurement(object):
             # write everything else
             else:
                 out_dic[k] = self.__dict__[k]
-        
-    #     if json:
-    #         json.dump(out_dic, open(path, 'w'))
-    #         return
-        
+                
         f = open(path,'w')
         f.write(str(out_dic))
         f.close()

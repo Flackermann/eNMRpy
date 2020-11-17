@@ -6,7 +6,6 @@ setup(
    author='Florian Ackermann',
    author_email='nairolf.ackermann@gmail.com',
    packages=['eNMRpy', 'eNMRpy.Measurement'],
-   #scripts=['bin/script1','bin/script2'],
    url='https://github.com/Flackermann/eNMRpy/',
    license='LICENSE.txt',
    description='nmrglue-based package for the import and analysis of electrophoretic NMR-data',
