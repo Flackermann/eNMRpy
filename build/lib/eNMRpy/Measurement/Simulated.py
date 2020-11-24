@@ -1,6 +1,8 @@
+from . import eNMR_Methods
+
 class Simulated(eNMR_Methods):
     '''
-    sublass of eNMR_Methods and Measurement for the import of simulated data via the SpecSim class
+    sublass of eNMR_Methods and Measurement for the import of simulated data via the SpecSim class in the Phasefitting Module
     '''
 
     def __init__(self, sim, alias=None):

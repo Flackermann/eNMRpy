@@ -28,7 +28,9 @@ class Measurement(object):
         self.alias = alias
         self.name = self.dateipfad.split(sep='/')[-2]+'/'+self.expno
         self.lineb = lineb
-                
+        
+        self.comment_string = None
+        
         # takes the title page to extract the volt increment
         try:
             title = open(self.dateipfad+"/pdata/1/title").read()
@@ -81,6 +83,27 @@ class Measurement(object):
         #self.dependency = None
 
         # END __INIT__
+    
+    def ph_ref(self, ref):
+        '''
+        reference your phase shifts on the shifts of one peak.
+        ref: string, name of the peak which phase is used for reference (usually solvent).
+        '''
+
+        ref_orig_ph = self.eNMRraw[ref].copy
+        for i in filter(lambda x: x[:2] =='ph' and x[-1]!='r', self.eNMRraw.keys()):
+            self.eNMRraw[i] = self.eNMRraw[i] - ref_orig_ph
+    
+    
+    def comment(self, s, append_to_title=False):
+        '''
+        write a comment as a multi-line-string or normal string
+        '''
+        self.comment_string = s
+        
+        if append_to_title:
+            #self._title_page_orig = self.title_page
+            self.title_page += self.comment_string
 
     def calibrate_ppm(self, ppmshift):
         """
@@ -310,7 +333,7 @@ class Measurement(object):
         saves the instance variables of the object in a .eNMRpy file
         '''
         
-        out_dic = {}
+        out_dic = {"import class": self.__class__.__name__,}
         
         # reduced number of instance variables for 1D-Measurements which may be potentially saved
         if self.__class__.__name__ == "Measurement":
@@ -343,11 +366,7 @@ class Measurement(object):
             # write everything else
             else:
                 out_dic[k] = self.__dict__[k]
-        
-    #     if json:
-    #         json.dump(out_dic, open(path, 'w'))
-    #         return
-        
+                
         f = open(path,'w')
         f.write(str(out_dic))
         f.close()

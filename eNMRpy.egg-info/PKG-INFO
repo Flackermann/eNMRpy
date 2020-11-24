@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: eNMRpy
-Version: 0.0.4
+Version: 0.0.5
 Summary: nmrglue-based package for the import and analysis of electrophoretic NMR-data
 Home-page: https://github.com/Flackermann/eNMRpy/
 Author: Florian Ackermann
