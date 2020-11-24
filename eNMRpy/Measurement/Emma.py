@@ -3,10 +3,16 @@
 # Schönhoff working group.
 # It works with the volt-increment method which calculates the respective voltage with the VC-list
 # Further Implementation can be asked for at f_schm52@wwu.de
-
+from .eNMR_Methods import _eNMR_Methods
+import matplotlib.pyplot as plt
+from .base import Measurement
+from re import findall
+import numpy as np
+import pandas as pd
      
 
-class eNMR_Emma(eNMR_Measurement):
+#class eNMR_Emma(eNMR_Measurement):
+class eNMR_Emma(_eNMR_Methods):
     #'''
     #This is the subsubclass of Masurement() and subclass of eNMR_Methods specialised to process data obtained from the experimental Schönhoff set-up
     
@@ -27,8 +33,8 @@ class eNMR_Emma(eNMR_Measurement):
     #linebroadening:
         #setting a standard-value for the linebroadening.
     #'''
-    def __init__(self, path, expno, Uink=None, dependency="U", alias=None, linebroadening=0.5, electrode_distance=2.2e-2):
-        Measurement.__init__(self, path, expno, linebroadening=linebroadening, alias=alias)
+    def __init__(self, path, expno, Uink=None, dependency="U", alias=None, lineb=0.5, electrode_distance=2.2e-2):
+        Measurement.__init__(self, path, expno, lineb=lineb, alias=alias)
         self.dependency = dependency.upper()
         
         self._x_axis = {"U": "U / [V]",

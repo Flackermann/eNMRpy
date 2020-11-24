@@ -333,7 +333,7 @@ class Measurement(object):
         saves the instance variables of the object in a .eNMRpy file
         '''
         
-        out_dic = {}
+        out_dic = {"import class": self.__class__.__name__,}
         
         # reduced number of instance variables for 1D-Measurements which may be potentially saved
         if self.__class__.__name__ == "Measurement":

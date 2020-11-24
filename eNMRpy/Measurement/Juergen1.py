@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from .base import Measurement
 from re import findall
 import pandas as pd
-
+import numpy as np
 
 class Juergen1(_eNMR_Methods):
     '''
@@ -87,6 +87,7 @@ class Juergen1(_eNMR_Methods):
         if Uink is not None:
             self.uInk = Uink
             
+        # this implies alternating polarity in the pulse program
         self.vcList["U / [V]"] = [self.vcList["vc"][n]/2*self.uInk if self.vcList["vc"][n] % 2 == 0
                                   else (self.vcList["vc"][n]+1)/2*self.uInk*-1
                                   for n in range(len(self.data[:, 0]))]
@@ -114,7 +115,7 @@ class Juergen1(_eNMR_Methods):
             root = diffpar.getroot()
             self.Delta = float(root.findall('DELTA')[0].text)*1e-3
             self.delta = float(root.findall('delta')[0].text)*1e-3  # it should be read as in microseconds at this point due to bruker syntax
-            print('The diffusion parameters were read from the respectie .XML!')
+            print('The diffusion parameters were read from the respective .XML!')
         except:
             # determination of the diffusion parameters for the Spectrometer "Emma"
             _d2 = self.dic["acqus"]["D"][2]
