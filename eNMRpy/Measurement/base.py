@@ -89,8 +89,8 @@ class Measurement(object):
         reference your phase shifts on the shifts of one peak.
         ref: string, name of the peak which phase is used for reference (usually solvent).
         '''
+
         ref_orig_ph = self.eNMRraw[ref].copy
-        
         for i in filter(lambda x: x[:2] =='ph' and x[-1]!='r', self.eNMRraw.keys()):
             self.eNMRraw[i] = self.eNMRraw[i] - ref_orig_ph
     
@@ -333,7 +333,7 @@ class Measurement(object):
         saves the instance variables of the object in a .eNMRpy file
         '''
         
-        out_dic = {}
+        out_dic = {"import class": self.__class__.__name__,}
         
         # reduced number of instance variables for 1D-Measurements which may be potentially saved
         if self.__class__.__name__ == "Measurement":
@@ -366,11 +366,7 @@ class Measurement(object):
             # write everything else
             else:
                 out_dic[k] = self.__dict__[k]
-        
-    #     if json:
-    #         json.dump(out_dic, open(path, 'w'))
-    #         return
-        
+                
         f = open(path,'w')
         f.write(str(out_dic))
         f.close()

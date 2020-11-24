@@ -14,6 +14,7 @@ class Pavel(_eNMR_Methods):
     dependency:
         'U': voltage dependent eNMR measurement
         'G': fieldgradient dependent eNMR measurement
+             -->reads only the first value in the vd-List to calculate the set voltage
 
     alias:
         Here you can place an individual name relevant for plotting. If None, the path is taken instead.
@@ -21,8 +22,11 @@ class Pavel(_eNMR_Methods):
         setting a standard-value for the linebroadening.
     d:
         electrode_distance
+        
+    Uconst:
+        constant voltage value set for gradient dependent measurements (dependency="G")
     '''
-    def __init__(self, path, expno, dependency='U', alias=None, lineb=.3, d=2.2e-2, cell_resistance=None):
+    def __init__(self, path, expno, dependency='U', alias=None, lineb=.3, d=2.2e-2, cell_resistance=None, Uconst=None):
         
         self.dependency = dependency
         self.cell_resistance = cell_resistance
@@ -63,18 +67,31 @@ class Pavel(_eNMR_Methods):
         self.g = self.eNMRraw["g in T/m"][0]
         
 
-        # converts the vd-List
-        for i, n in enumerate(self.eNMRraw['vd']):
-            self.eNMRraw.loc[i, 'vd_temp'] = float(n[:-1])
-        # calculates the applied Voltages
-
-        if self.dependency.upper() == "U":
+        if self.dependency.upper() == "G":
+            self.uInk = None
+            # was introduced for vdlists with only a single entry but works regardless of the number of entries if dependency=='G', since the voltage is kept constant
+            #if self.vdList.shape[0] == 1: 
+            self.eNMRraw = self.difflist
+            self.eNMRraw['vd'] = float(self.vdList.iloc[0, 0][:-1])
+            self.eNMRraw['U / [V]'] = [
+            0 if (self.eNMRraw.loc[i,'vd'] <= 0.6)
+            else 
+            n 
+            for i, n in enumerate(self.eNMRraw['vd']*5)]
+            
+        else:
+            # converts the vd-List
+            for i, n in enumerate(self.eNMRraw['vd']):
+                self.eNMRraw.loc[i, 'vd_temp'] = float(n[:-1])
+            # calculates the applied Voltages        
+        
+        if (self.dependency.upper() == "U") and (self.dic['acqus']['PULPROG'] == 'py_ENMR_DSTE_3.2_AL'): # checks additionally for the used PULPROG
             self.eNMRraw[self._x_axis] = [
                 0 if (self.eNMRraw.loc[i,'vd_temp'] <= 0.6)
                 else 
                 n if i%2==0 
                 else 
-                n*-1
+                n*-1 # voltage reversal inherent to the PULPROG
                 for i, n in enumerate(self.eNMRraw['vd_temp']*5)]
         
             self.uInk = self.eNMRraw['U / [V]'][0] - self.eNMRraw['U / [V]'][1] 
@@ -111,7 +128,8 @@ class Pavel(_eNMR_Methods):
                 self.uInk *= -1
             # calculation of the Voltage from cell resistance and Current /1000 because of mA
             self.eNMRraw[self._x_axis] *= self.cell_resistance/1000
-            
+
+         
     def plot_spec(self, row, xlim=None, figsize=None, invert_xaxis=True, sharey=True):#, ppm=True):
         from .Juergen1 import Juergen1 as eNMR_Measurement
         return eNMR_Measurement.plot_spec(self, row, xlim, figsize, invert_xaxis, sharey)#, ppm=True):

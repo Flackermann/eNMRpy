@@ -32,24 +32,14 @@ class _eNMR_Methods(Measurement):
     delta= %.1fms, g= %.3f T/m, e-distance=%.0fmm'''%(
         self.nuc, self.expno, self.Delta*1000, 
         self.ppm[0], self.ppm[-1],
-        self.delta*1000, self.g, self.d*1000
+        self.delta*1000, self.g, self.d*1000 # outputs the gradient time and diffusion time in ms
         )
     
     def __getitem__(self, key):
         if type(key) == str:
             return self.eNMRraw[key]
         elif type(key) == int:
-            return (self.ppm, self.data[key])
-        
-    
-    
-    #def autophase_first_spec(self):
-        #'''
-        #nifty tool to automatically autophase the first
-        #'''
-        
-        #return
-                
+            return (self.ppm, self.data[key])                
 
     def autophase_phase_analysis(self,
                   returns=False,
@@ -98,15 +88,15 @@ class _eNMR_Methods(Measurement):
             data_ph = np.append(data_ph, _val)
                 
             if method == 'acme':
-                self.eNMRraw.loc[n, "ph0acme"] = _val[0]  # *-1
+                self.eNMRraw.loc[n, "ph0acme"] = _val[0]  
                 if progress:
                     clear_output() # keeps the output clean. remove for more info on iteration steps etc.
             elif method == 'difference':
-                self.eNMRraw.loc[n, "ph0diff"] = _val[0]  # *-1
+                self.eNMRraw.loc[n, "ph0diff"] = _val[0]  
                 if progress:
                     clear_output() # keeps the output clean. remove for more info on iteration steps etc.
             else:
-                self.eNMRraw.loc[n, "ph0sqdiff"] = _val[0]  # *-1
+                self.eNMRraw.loc[n, "ph0sqdiff"] = _val[0]  
                 if progress:
                     clear_output() # keeps the output clean. remove for more info on iteration steps etc.
        
