@@ -366,7 +366,16 @@ class _eNMR_Methods(Measurement):
 
         _cx = plt.subplot(223, sharex=_ax)
         _cx.scatter(intensity_data['U'], intensity_data['ph'], c='k')
-        _cx.set_xlabel('$U$ / V')
+        
+        if self.dependency.upper() == "U":
+            _cx.set_xlabel('$U$ / V')
+        elif self.dependency.upper() == "G":
+            _cx.set_xlabel("$g$ / $($T$\cdot$m$^{-1})$")
+        elif self.dependency.upper() == 'I':
+            _cx.set_xlabel("$I$ / mA")
+        elif self.dependency.upper() == 'RI':
+            _cx.set_xlabel("$(R \cdot I)$ / V")
+
         _cx.set_ylabel('$\t{\Delta}\phi$ / °')
 
         _dx = plt.subplot(224, sharex=_bx)
