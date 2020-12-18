@@ -99,7 +99,23 @@ class Pavel(_eNMR_Methods):
                 self.uInk = self.eNMRraw['U / [V]'][0] - self.eNMRraw['U / [V]'][2] 
             if self.uInk < 0:
                 self.uInk *= -1
+                
+        elif (self.dependency.upper() == "U"):
+            print('Warning: a different PULPROG is used instead of py_ENMR_DSTE_3.2_AL! Check if you use the correct import class')
+            self.eNMRraw[self._x_axis] = [
+                0 if (self.eNMRraw.loc[i,'vd_temp'] <= 0.6)
+                else 
+                n if i%2==0 
+                else 
+                n*-1 # voltage reversal inherent to the PULPROG
+                for i, n in enumerate(self.eNMRraw['vd_temp']*5)]
         
+            self.uInk = self.eNMRraw['U / [V]'][0] - self.eNMRraw['U / [V]'][1] 
+            if self.uInk == 0:
+                self.uInk = self.eNMRraw['U / [V]'][0] - self.eNMRraw['U / [V]'][2] 
+            if self.uInk < 0:
+                self.uInk *= -1
+                
         elif self.dependency.upper() == "I":
             self.uInk = None
             self.eNMRraw[self._x_axis] = [
