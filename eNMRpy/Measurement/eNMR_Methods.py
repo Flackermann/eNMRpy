@@ -380,7 +380,7 @@ class _eNMR_Methods(Measurement):
 
         _dx = plt.subplot(224, sharex=_bx)
         _dx.plot(intensity_data['ph'], 'ok')
-        _dx.set_xlabel('vc')
+        _dx.set_xlabel('row')
 
         fig.savefig(self.path+'intensity_plot_'+self.expno+".pdf")
 
