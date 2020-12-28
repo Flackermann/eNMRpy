@@ -32,7 +32,7 @@ class Flo(_eNMR_Methods):
         
         super().__init__(path, expno, lineb=lineb, alias=alias)
         
-        #self._x_axis = {"G": 'g in T/m', "U": 'U / [V]'}[dependency.upper()]
+        self._x_axis = {"G": 'g in T/m', "U": 'U / [V]', "I": "I / mA"}[dependency.upper()]
         # import the diffusion parameters
         diffpar = etree.parse(self.dateipfad+'/diff.xml')
         root = diffpar.getroot()
@@ -49,11 +49,20 @@ class Flo(_eNMR_Methods):
 
         bitregex = r"(define list.*bit.*|define list.*pol.*)"
         vlistregex = r".*Voltage\sset\sList.*= \n;.*]"
-
+        ilistregex = r".*Current\sset\sList.*= \n;.*]"
+        
         # list, reading all lines with bit lists in the pulse program
         rawlist = re.findall(bitregex, self.pulseprogram)
         rawvlist = re.findall(vlistregex, self.pulseprogram) 
-
+        
+        # check vor const U or I mode
+        if len(rawvlist) == 0:
+            rawvlist = re.findall(ilistregex, self.pulseprogram) 
+            self.dependency = 'I'
+            self._x_axis = "I / mA"
+            print('dependency changed to "I" --> const current mode')
+        
+        
         rawvlist = rawvlist[0].split('= \n;')
         vlist = eval(rawvlist[1])
 
@@ -73,8 +82,12 @@ class Flo(_eNMR_Methods):
             # transformation of the bitstring minus polarity, which is the last bit, with a base of 2
             intvar = int(bitstring[:-1][::-1], 2)
             
-            if self.dependency.upper()=='U':
+            if self.dependency.upper() == 'U':
                 return round(polarity*intvar*200/255, 2)
+            
+            if self.dependency.upper() == 'I':
+                return round(polarity*intvar*50/255, 2)
+            
 
 
         ulist = [byte_to_int(bitarray, i) for i in range(len(bitarray[0]))]
@@ -83,10 +96,11 @@ class Flo(_eNMR_Methods):
             pass
         else:
             raise ValueError('The decoded voltage list does not match the endcoding voltage list! Revisit your pulse program!\n {} \n{}'.format(ulist, vlist))
-            
         
-        self.eNMRraw = pd.DataFrame(ulist, columns=['U / [V]'])
-
+        
+        self.eNMRraw = pd.DataFrame(ulist, columns=[self._x_axis])
+        
+        
         try:
             self.difflist = pd.read_csv(self.dateipfad+"/gradlist",
                                     names=["g in T/m"])*0.01
