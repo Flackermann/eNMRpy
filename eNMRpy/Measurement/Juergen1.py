@@ -4,6 +4,7 @@ from .base import Measurement
 from re import findall
 import pandas as pd
 import numpy as np
+import nmrglue as ng
 
 class Juergen1(_eNMR_Methods):
     '''
