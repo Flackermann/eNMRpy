@@ -1,3 +1,7 @@
+Version 0.0.6
+-------------
+- more bugfixes when using other pulse programs with Pavel
+
 Version 0.0.5
 -------------
 - minor bugfixes

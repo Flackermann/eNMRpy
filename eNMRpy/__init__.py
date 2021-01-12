@@ -17,6 +17,7 @@ under eNMRpy.MOSY
 #from .MOSY import MOSY
 # Pavel Class as the Std Import-Class since it is mostly used in our working group
 from .Measurement import Pavel as Import_eNMR_Measurement 
+from .Meausrement import Flo as Import_eNMR_Measurement_12Bit
 from . import tools
 #print('%s imported'%__name__)
 
