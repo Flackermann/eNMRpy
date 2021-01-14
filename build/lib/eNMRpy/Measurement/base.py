@@ -371,3 +371,25 @@ class Measurement(object):
         f.write(str(out_dic))
         f.close()
         return
+    
+    def compare_dicts(self, other):
+        """
+        compares the "acqus" parameters in self.dic und returns a dataframe of deviating entries
+        """
+        if type(self) != type(other):
+            print('beware! types of both measurement objects are not equal!')
+                
+        klist = []
+        for k in self.dic['acqus']:
+            if not self.dic['acqus'][k]==other.dic['acqus'][k]:
+    #             print(self.dic['acqus'][k], other.dic['acqus'][k])
+                klist.append(k)
+        selflist = [self.dic['acqus'][k] for k in klist]
+        otherlist = [other.dic['acqus'][k] for k in klist]
+        
+        
+        dfdiff = pd.DataFrame(index=klist)
+        dfdiff['self'] = selflist
+        dfdiff['other'] = otherlist
+        return dfdiff
+    
