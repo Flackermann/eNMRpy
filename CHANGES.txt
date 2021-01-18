@@ -1,3 +1,7 @@
+Version 0.0.7
+-------------
+- autosave option added to analysis methods in order to save the eNMRraw-table in the original expno folder
+
 Version 0.0.6
 -------------
 - more bugfixes when using other pulse programs with Pavel

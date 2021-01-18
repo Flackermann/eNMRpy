@@ -40,13 +40,20 @@ class _eNMR_Methods(Measurement):
             return self.eNMRraw[key]
         elif type(key) == int:
             return (self.ppm, self.data[key])                
-
+    
+    def eNMRraw_save(self):
+        """
+        writes the eNMRraw-table to an excel file in the originial expno-folder
+        """
+        self.eNMRraw.to_excel(self.dateipfad+'/eNMRraw_phasedata.xlsx')
+    
     def autophase_phase_analysis(self,
                   returns=False,
                   method="acme",
                   progress=False,
                   period_compensation=True,
-                  normalize=True):
+                  normalize=True,
+                  autosave_to_expno=True):
         """
         analyzes the phase of the spectral data and returns phased data
 
@@ -152,6 +159,9 @@ class _eNMR_Methods(Measurement):
 
             self.eNMRraw["ph0sqdiffreduced"] = corr_enmr['ph0sqdiff']*self.d/(self.eNMRraw['g in T/m'][0]*self.Delta*self.delta/1000*self.gamma)
 
+        if autosave_to_expno:
+            self.eNMRraw_save()
+        
         print("done, all went well")
         
         if returns is True:

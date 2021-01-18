@@ -145,7 +145,7 @@ def reduce_fitted_phases(Measurementobject, SpecModel):
         m.eNMRraw[k+'reduced'] = m.eNMRraw[k]*m.d/m.delta/m.Delta/m.g/m.gamma
         m.eNMRraw[k+'reduced'] -= m.eNMRraw.loc[m.eNMRraw['U / [V]']==0, k+'reduced'][0]
 
-def fit_Measurement(obj_M, obj_S, fixed_parameters=None, plot=False, savepath=None, **plot_kwargs):
+def fit_Measurement(obj_M, obj_S, fixed_parameters=None, plot=False, savepath=None, autosave_to_expno=True, **plot_kwargs):
     '''
     function to fit a the series of voltage dependent spectra contained in a typical eNMR measurement
     
@@ -205,7 +205,9 @@ def fit_Measurement(obj_M, obj_S, fixed_parameters=None, plot=False, savepath=No
             
     #for p in fp: # reset all vary-Values
         #obj_S.params[p].set(vary=True)
-    
+        
+    if autosave_to_expno:
+        obj_M.eNMRraw_save()
     
     print('fitting finished')
 
