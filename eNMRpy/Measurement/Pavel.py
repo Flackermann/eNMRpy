@@ -45,7 +45,20 @@ class Pavel(_eNMR_Methods):
             self.vdList = pd.read_csv(self.dateipfad+"/vdlist",
                                       names=["vd"]).loc[:len(self.data[:, 0])-1]
         except IndexError:
-            raise IndexError('Your data is %i-dimensional instead of 2-dimensional. This may be an issue with Topspin. Most likely your measurement was aborted.'%self.data.ndim)
+            try:
+                self.vdList = pd.read_csv(self.dateipfad+"/vdlist",names=["vd"])
+                self.lenarr = len(self.data)/len(self.vdList)
+                self.data1 = np.empty((0,int(self.lenarr-1)))
+                for i in range (len(self.vdList)):
+                    lower = int(i*self.lenarr)
+                    upper = int(lower+self.lenarr-1)
+                    lst =list(self.data[lower:upper])
+                    self.data1 = np.append(self.data1,[lst],axis=0)
+                self.vdList = pd.read_csv(self.dateipfad+"/vdlist",names=["vd"]).loc[:len(self.data1[:, 0])-1]
+                self.data = self.data1
+                print('The import of the vdList was changed to fit to the Topspin 4 data format!')
+            except:
+                raise IndexError('Your data is %i-dimensional instead of 2-dimensional. This may be an issue with Topspin. Most likely your measurement was aborted.'%self.data.ndim)
         except:
             raise FileNotFoundError('no VD-List found!')
             #print('no vdList found, generated ones list instead')
