@@ -114,7 +114,7 @@ class Measurement(object):
         """
         self.ppm = self._ppmscale + ppmshift
 
-    def proc(self, linebroadening=None, phc0=0, phc1=0, zfpoints=None, xmin=None, xmax=None, cropmode="percent"):
+    def proc(self, linebroadening=None, phc0=0, phc1=0, zfpoints=None, xmin=None, xmax=None, cropmode="absolute"):
         """
         processes the spectral data by:
             - removing digital filter
