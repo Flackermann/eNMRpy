@@ -172,7 +172,7 @@ class Measurement(object):
         self.data_orig = self.data
 
         if (xmin is not None) or (xmax is not None):
-            self.data = self.set_spectral_region(xmin=xmin, xmax=xmax, mode=cropmode)
+            self.set_spectral_region(xmin=xmin, xmax=xmax, mode=cropmode)
     
 
     def plot_fid(self, xmax=None, xmin=0, step=1):
