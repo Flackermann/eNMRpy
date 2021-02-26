@@ -50,9 +50,9 @@ class Measurement(object):
         self.pdata = ng.bruker.read_procs_file(self.dateipfad+"/pdata/1")
         lst_acqus__coreheader = self.dic['acqus']['_coreheader']
         self.split = lst_acqus__coreheader[0].split()
-        self.version = self.split[4]
-        if self.version == '4.1.1':
-            self.lenarr = len(self.data)/len(self.dic['proc2s']['TDeff'])
+        self.version = int(self.split[4][0])
+        if self.version >3:
+            self.lenarr = len(self.data)/self.dic['proc2s']['TDeff']
             self.data1 = np.empty((0,int(self.lenarr-1)))
             for i in range (self.dic['proc2s']['TDeff']):
                 lower = int(i*self.lenarr)
@@ -60,9 +60,7 @@ class Measurement(object):
                 lst =list(self.data[lower:upper])
                 self.data1 = np.append(self.data1,[lst],axis=0)
             self.data = self.data1
-            print('The Topspin 4 import was used')
-        else:
-            print('The Topspin 3 or older import was used')
+        print('The Topspin %i import was used'%self.version)
         
        
         # original dataset
