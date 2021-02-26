@@ -41,7 +41,7 @@ class Pavel(_eNMR_Methods):
         self.delta = float(root.findall('delta')[0].text)*1e-3  #in Seconds
         print('The diffusion parameters were read from the respective .XML!')
         
-         try:
+        try:
             self.vdList = pd.read_csv(self.dateipfad+"/vdlist",
                                       names=["vd"]).loc[:len(self.data[:, 0])-1]
         except IndexError:
