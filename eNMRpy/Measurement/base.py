@@ -393,3 +393,18 @@ class Measurement(object):
         dfdiff['other'] = otherlist
         return dfdiff
     
+    def revert_phases(self):           # for probes with inversed electrode geometry, e.g. Pavels probe
+        """
+        reverts all phases in eNMRraw to account for inversed electrode geometry like in Pavels probe
+        Will only change the phases once, not with every execution of the cell.
+        """
+        try:
+            if self.executed == self.expno:
+                print('Phases already reverted in this expno. Nothing to do here.')
+        except AttributeError:
+                self.executed = self.expno + '_not_reverted'
+                print("Phases reverted.")
+        if self.executed != self.expno:
+            self.executed = self.expno
+            for i in filter(lambda x: x[0:2]=='ph' and x[-1]!='r', self.eNMRraw.keys()):
+                self.eNMRraw[i] = self.eNMRraw[i]*-1    
