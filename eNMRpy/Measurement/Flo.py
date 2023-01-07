@@ -7,23 +7,23 @@ import numpy as np
 
 class Flo(_eNMR_Methods):
     '''
-    This is the subsubclass of Masurement() and subclass of eNMR_Methods specialised to process data obtained from the experimental Swedish from Pavel set-up
-    the voltage list is valculated from the vd-values
+    This is the subsubclass of Masurement() and subclass of eNMR_Methods specialised to process data obtained
+    from the 12-bit power source supporting the 4-electrode setup. The voltage list is valculated from the pulseprogram.
 
     path:
         relative or absolute path to the measurements folder
     expno:
         the to the experiment number corresponding EXPNO
     dependency:
-        'U': voltage dependent eNMR measurement
+        'U': constant voltage mode eNMR measurement
         'G': fieldgradient dependent eNMR measurement
-
+        'I': constant current mode eNMR measurement
     alias:
         Here you can place an individual name relevant for plotting. If None, the path is taken instead.
     lineb:
         setting a standard-value for the linebroadening.
     d:
-        electrode_distance
+        electrode_distance in m
     '''
     def __init__(self, path, expno, dependency='U', alias=None, lineb=.3, d=2.2e-2, cell_resistance=None):
         
