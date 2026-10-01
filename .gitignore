@@ -2,4 +2,7 @@
 ./upload_twine_test.sh
 .env
 
-**/*.sh
+*.sh
+
+dist/
+build/
