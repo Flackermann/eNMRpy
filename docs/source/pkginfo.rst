@@ -15,6 +15,7 @@ Structure of the package
     |   |-- __init__.py
     |   |-- base.py
     |   |-- eNMR_Methods.py
+    |   |-- Flo.py
     |   |-- Pavel.py
     |   |-- Emma.py
     |   |-- Juergen1.py

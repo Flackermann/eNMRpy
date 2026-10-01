@@ -10,32 +10,42 @@ For documentation please read <a href="https://enmrpy.readthedocs.io/en/testbran
 # Installation
 Install the latest release simply via <code>$ pip install eNMRpy</code>
 
+# Development
+Install the package in editable mode with the test dependencies and run the test suite:
+
+```
+pip install -e ".[test]"
+pytest
+```
+
+or with uv: <code>$ uv run --extra test pytest</code>
+
 # Range of functions covered
 
 - Import of Bruker-based eNMR-Data
   	- 3 different experimental Setups so far
   	- please consider **pull requests** on  <a href="https://github.com/Flackermann/eNMRpy">GitHub</a> to get help for your own experimental setup
 
-- Phasenwinkelanalyse
-    - Phasenkorrektur-Analyse (old approach)
-        - Entropieminimierung
-        - Spektrenabgleich
-        - Vergleich der Phasenkorrigierten Spektren durch Übereinanderlegen
+- Phase angle analysis
+    - Phase correction analysis (old approach)
+        - Entropy minimization
+        - Spectra matching
+        - Comparison of the phase-corrected spectra by overlaying them
 
-    - Phasenanalyse mittels Fitting (new approach)
-        - Lorentz/Voigt-Peaks
-            - superposition von beliebig vielen Peaks
-            - Individuelles festsetzen von Parametern
+    - Phase analysis by fitting (new approach)
+        - Lorentz/Voigt peaks
+            - superposition of any number of peaks
+            - individual fixing of parameters
     
-    - Regressionsrechnung
-        - Berechnung der jeweiligen Mobilitäten aus automatisch bestimmten experimentellen Parametern
+    - Regression
+        - Calculation of the respective mobilities from automatically determined experimental parameters
     
-    - Vergleich der verschiedenen Ergebnisse
-        (- einfaches Tool zum Erstellen von Graphen)
+    - Comparison of the different results
+        (- simple tool for creating graphs)
 
-- Phasenanalyse mittels 2D FFT --> Mobility ordered Spectroscopy (MOSY)
-    - States-Haberkorn-Methode
-    - Ermittlung der Mobilitätsachse
-    - Plotten von Slices zum Vergleich der Ergebnisse/Peaks
-    - Automatische normierung der Intensitäten und Auffindung der Maxima.
-    - Durch Signalverlust mit steigender Spannung stellt man eine zu hohe Mobilität fest!!!
+- Phase analysis via 2D FFT --> Mobility Ordered Spectroscopy (MOSY)
+    - States-Haberkorn method
+    - Determination of the mobility axis
+    - Plotting of slices to compare the results/peaks
+    - Automatic normalization of the intensities and detection of the maxima
+    - Note: signal loss with increasing voltage leads to an overestimated mobility!

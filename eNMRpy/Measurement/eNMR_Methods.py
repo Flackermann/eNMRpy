@@ -1,5 +1,5 @@
 from .base import Measurement
-from sklearn.linear_model import huber as hub
+from sklearn.linear_model import HuberRegressor
 import numpy as np
 import nmrglue as ng
 import matplotlib.pyplot as plt
@@ -508,25 +508,26 @@ class _eNMR_Methods(Measurement):
         else:
             umax = ulim[1]
 
-        _npMatrix = np.matrix(_eNMRreg[(self.eNMRraw[self._x_axis] <= umax)
-                                                 == (self.eNMRraw[self._x_axis] >= umin)])
+        _npMatrix = _eNMRreg[(self.eNMRraw[self._x_axis] <= umax)
+                             == (self.eNMRraw[self._x_axis] >= umin)].to_numpy()
 
-        _X_train, _Y_train = _npMatrix[:, 0], _npMatrix[:, 1]
+        # scikit-learn expects a 2D feature array and a 1D target
+        _X_train, _Y_train = _npMatrix[:, [0]], _npMatrix[:, 1]
         
         # regression object
-        huber = hub.HuberRegressor(epsilon=epsilon)
+        huber = HuberRegressor(epsilon=epsilon)
         huber.fit(_X_train, _Y_train)
         
         # linear parameters
         m = huber.coef_  # slope
         b = huber.intercept_  # y(0)
         _y_pred = huber.predict(_X_train)
-        _y_pred = _y_pred.reshape(np.size(_X_train), 1)
         
         # drop the outliers
-        _outX_train = np.array(_X_train[[n == False for n in huber.outliers_]])
-        _outY_train = np.array(_Y_train[[n == False for n in huber.outliers_]])
-        _outY_pred = np.array(_y_pred[[n == False for n in huber.outliers_]])
+        _inliers = ~huber.outliers_
+        _outX_train = _X_train[_inliers]
+        _outY_train = _Y_train[_inliers]
+        _outY_pred = _y_pred[_inliers]
         
         # mark outliers in dataset
         # self._inliers = [n is not True for n in self.huber.outliers_]
@@ -550,7 +551,7 @@ class _eNMR_Methods(Measurement):
         self.lin_res_dic[y_column] = {'b': b,
                                    'm': m,
                                    'r_square': r_square,
-                                   'x': np.array(_X_train.tolist()).ravel(),
+                                   'x': _X_train.ravel(),
                                    'y': _Y_train,
                                    'y_fitted': _y_pred.ravel(),
                                    'sig_m': sig_m}
