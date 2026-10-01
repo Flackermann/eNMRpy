@@ -21,8 +21,23 @@ dependencies = [
     "scikit-learn<=0.23",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist",
+]
+dev = [
+    "eNMRpy[test]",
+    "tox",
+]
+
 [project.urls]
 Homepage = "https://github.com/Flackermann/eNMRpy/"
 
 [tool.setuptools]
 packages = ["eNMRpy", "eNMRpy.Measurement"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
