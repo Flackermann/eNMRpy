@@ -2,6 +2,8 @@
 ./upload_twine_test.sh
 .env
 
+.ipynb_checkpoints/
+
 *.sh
 
 dist/
