@@ -7,6 +7,7 @@ name = "eNMRpy"
 version = "0.0.6b"
 description = "nmrglue-based package for the import and analysis of electrophoretic NMR-data"
 readme = "README.md"
+requires-python = ">=3.10"
 license = { file = "LICENSE.txt" }
 authors = [
     { name = "Florian Ackermann", email = "nairolf.ackermann@gmail.com" },
