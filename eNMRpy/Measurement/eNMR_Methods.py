@@ -1,10 +1,12 @@
-from .base import Measurement
-from sklearn.linear_model import HuberRegressor
-import numpy as np
-import nmrglue as ng
-import matplotlib.pyplot as plt
-import pandas as pd
 import lmfit as lf
+import matplotlib.pyplot as plt
+import nmrglue as ng
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import HuberRegressor
+
+from .base import Measurement
+
 
 class _eNMR_Methods(Measurement):
     """

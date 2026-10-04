@@ -1,8 +1,10 @@
-from .eNMR_Methods import _eNMR_Methods
-import pandas as pd
-import xml.etree.ElementTree as etree
 import re
+import xml.etree.ElementTree as etree
+
 import numpy as np
+import pandas as pd
+
+from .eNMR_Methods import _eNMR_Methods
 
 
 class Flo(_eNMR_Methods):

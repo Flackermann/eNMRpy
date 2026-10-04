@@ -1,9 +1,11 @@
+from io import StringIO
+from re import findall
+
 import matplotlib.pyplot as plt
 import nmrglue as ng
-from re import findall
 import numpy as np
 import pandas as pd
-from io import StringIO
+
 
 class Measurement(object):
     """

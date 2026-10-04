@@ -1,10 +1,12 @@
-from .eNMR_Methods import _eNMR_Methods
-import matplotlib.pyplot as plt
-from .base import Measurement
 from re import findall
-import pandas as pd
+
+import matplotlib.pyplot as plt
 import numpy as np
-import nmrglue as ng
+import pandas as pd
+
+from .base import Measurement
+from .eNMR_Methods import _eNMR_Methods
+
 
 class Juergen1(_eNMR_Methods):
     '''

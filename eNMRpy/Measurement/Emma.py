@@ -3,13 +3,15 @@
 # Schönhoff working group.
 # It works with the volt-increment method which calculates the respective voltage with the VC-list
 # Further Implementation can be asked for at f_schm52@wwu.de
-from .eNMR_Methods import _eNMR_Methods
-import matplotlib.pyplot as plt
-from .base import Measurement
 from re import findall
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-     
+
+from .base import Measurement
+from .eNMR_Methods import _eNMR_Methods
+
 
 #class eNMR_Emma(eNMR_Measurement):
 class eNMR_Emma(_eNMR_Methods):

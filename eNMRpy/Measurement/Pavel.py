@@ -1,6 +1,9 @@
-from .eNMR_Methods import _eNMR_Methods
-import pandas as pd
 import xml.etree.ElementTree as etree
+
+import pandas as pd
+
+from .eNMR_Methods import _eNMR_Methods
+
 
 class Pavel(_eNMR_Methods):
     '''
