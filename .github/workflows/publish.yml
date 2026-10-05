@@ -20,7 +20,7 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
             exit 1
           fi
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0
       - run: uv run --locked --extra test pytest
       - run: uv build
       - uses: actions/upload-artifact@v7
