@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -14,12 +16,14 @@ jobs:
       - name: Check that the tag is on master
         run: git merge-base --is-ancestor "$GITHUB_SHA" origin/master
       - name: Check that the tag matches the package version
+        id: version
         run: |
           version=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
           if [ "v$version" != "$GITHUB_REF_NAME" ]; then
             echo "Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
             exit 1
           fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - uses: astral-sh/setup-uv@v10.2.0
       - run: uv run --locked --extra test pytest
       - run: uv build
@@ -28,12 +32,62 @@ jobs:
           name: dist
           path: dist/
 
-  publish:
+  publish-testpypi:
     needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write             # required for trusted publishing
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true     # lets a failed PyPI upload be re-run
+
+  verify-testpypi:
+    needs: [build, publish-testpypi]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      # only the tests and top-level files, so pytest runs against the installed package
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: tests
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: "3.13"
+      - name: Download eNMRpy from TestPyPI
+        # Only eNMRpy itself comes from TestPyPI. Anyone can upload there, so the
+        # dependencies are installed from PyPI in the next step.
+        # Retries because a new upload can take a moment to appear in the index.
+        run: |
+          for attempt in $(seq 1 10); do
+            uvx pip download --no-deps --dest wheel/ \
+              --index-url https://test.pypi.org/simple/ "eNMRpy==$VERSION" && exit 0
+            echo "Not available yet (attempt $attempt), retrying in 30s"
+            sleep 30
+          done
+          exit 1
+      - name: Install it with dependencies from PyPI
+        run: |
+          uv venv
+          uv pip install "$(ls wheel/*.whl)[test]"
+      - name: Run the tests against the installed package
+        run: |
+          test ! -d eNMRpy   # make sure the source tree is not shadowing the install
+          uv run --no-project pytest
+
+  publish-pypi:
+    needs: verify-testpypi
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write             # required for PyPI trusted publishing
+      id-token: write             # required for trusted publishing
     steps:
       - uses: actions/download-artifact@v8
         with:
